@@ -7,8 +7,6 @@ namespace GlamourRoulette.Game;
 
 internal sealed class GlamourPlateApplier
 {
-    private const string ChatPrefix = "[Glamour Roulette]";
-
     private readonly PluginServices services;
 
     public GlamourPlateApplier(PluginServices services)
@@ -47,7 +45,7 @@ internal sealed class GlamourPlateApplier
                     result);
 
                 return ApplyGlamourPlateResult.Failed(
-                    $"{ChatPrefix} Failed to apply glamour plate {plate.Number}: the game rejected the gearset change.");
+                    $"Failed to apply glamour plate {plate.Number}: the game rejected the gearset change.");
             }
 
             this.services.Log.Information(
@@ -58,12 +56,12 @@ internal sealed class GlamourPlateApplier
 
             return ApplyGlamourPlateResult.Succeeded(
                 plate,
-                $"{ChatPrefix} Applied glamour plate {plate.Number} to gearset {gearsetNumber}.");
+                $"Applied glamour plate {plate.Number} to gearset {gearsetNumber}.");
         }
         catch (Exception ex)
         {
             this.services.Log.Error(ex, "Failed to apply glamour plate {PlateNumber}", plate.Number);
-            return ApplyGlamourPlateResult.Failed($"{ChatPrefix} Failed to apply glamour plate {plate.Number}: game API call failed.");
+            return ApplyGlamourPlateResult.Failed($"Failed to apply glamour plate {plate.Number}: game API call failed.");
         }
     }
 
@@ -161,6 +159,6 @@ internal sealed class GlamourPlateApplier
     private ApplyGlamourPlateResult Fail(string message)
     {
         this.services.Log.Warning("glamour_plate_apply_failed message={Message}", message);
-        return ApplyGlamourPlateResult.Failed($"{ChatPrefix} {message}");
+        return ApplyGlamourPlateResult.Failed(message);
     }
 }

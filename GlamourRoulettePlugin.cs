@@ -1,5 +1,6 @@
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using GlamourRoulette.Commands;
 using GlamourRoulette.Configuration;
 using GlamourRoulette.Game;
@@ -17,11 +18,33 @@ public sealed class GlamourRoulettePlugin : IDalamudPlugin
     private readonly ConfigWindow configWindow;
     private readonly CommandHandler commandHandler;
 
-    public GlamourRoulettePlugin(IDalamudPluginInterface pluginInterface)
+    public GlamourRoulettePlugin(
+        IDalamudPluginInterface pluginInterface,
+        ICommandManager commandManager,
+        IClientState clientState,
+        ICondition condition,
+        IObjectTable objectTable,
+        IDataManager dataManager,
+        IChatGui chatGui,
+        IFramework framework,
+        IGameGui gameGui,
+        ISigScanner sigScanner,
+        IGameInteropProvider gameInteropProvider,
+        IPluginLog log)
     {
-        this.services = pluginInterface.Create<PluginServices>()
-            ?? throw new InvalidOperationException("Failed to create Glamour Roulette plugin services.");
-        this.services.Initialize(pluginInterface);
+        this.services = new PluginServices(
+            pluginInterface,
+            commandManager,
+            clientState,
+            condition,
+            objectTable,
+            dataManager,
+            chatGui,
+            framework,
+            gameGui,
+            sigScanner,
+            gameInteropProvider,
+            log);
 
         this.configuration = this.services.PluginInterface.GetPluginConfig() as PluginConfiguration ?? new PluginConfiguration();
         this.configuration.Initialize(this.services.PluginInterface);

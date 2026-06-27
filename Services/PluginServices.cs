@@ -1,48 +1,59 @@
-using Dalamud.IoC;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 
 namespace GlamourRoulette.Services;
 
-public sealed class PluginServices
+internal sealed class PluginServices
 {
-    internal void Initialize(IDalamudPluginInterface pluginInterface)
+    public PluginServices(
+        IDalamudPluginInterface pluginInterface,
+        ICommandManager commandManager,
+        IClientState clientState,
+        ICondition condition,
+        IObjectTable objectTable,
+        IDataManager dataManager,
+        IChatGui chatGui,
+        IFramework framework,
+        IGameGui gameGui,
+        ISigScanner sigScanner,
+        IGameInteropProvider gameInteropProvider,
+        IPluginLog log)
     {
         this.PluginInterface = pluginInterface;
+        this.CommandManager = commandManager;
+        this.ClientState = clientState;
+        this.Condition = condition;
+        this.ObjectTable = objectTable;
+        this.DataManager = dataManager;
+        this.ChatGui = chatGui;
+        this.Framework = framework;
+        this.GameGui = gameGui;
+        this.SigScanner = sigScanner;
+        this.GameInteropProvider = gameInteropProvider;
+        this.Log = log;
     }
 
-    public IDalamudPluginInterface PluginInterface { get; private set; } = null!;
+    internal IDalamudPluginInterface PluginInterface { get; }
 
-    [PluginService]
-    public ICommandManager CommandManager { get; private set; } = null!;
+    internal ICommandManager CommandManager { get; }
 
-    [PluginService]
-    public IClientState ClientState { get; private set; } = null!;
+    internal IClientState ClientState { get; }
 
-    [PluginService]
-    public ICondition Condition { get; private set; } = null!;
+    internal ICondition Condition { get; }
 
-    [PluginService]
-    public IObjectTable ObjectTable { get; private set; } = null!;
+    internal IObjectTable ObjectTable { get; }
 
-    [PluginService]
-    public IDataManager DataManager { get; private set; } = null!;
+    internal IDataManager DataManager { get; }
 
-    [PluginService]
-    public IChatGui ChatGui { get; private set; } = null!;
+    internal IChatGui ChatGui { get; }
 
-    [PluginService]
-    public IFramework Framework { get; private set; } = null!;
+    internal IFramework Framework { get; }
 
-    [PluginService]
-    public IGameGui GameGui { get; private set; } = null!;
+    internal IGameGui GameGui { get; }
 
-    [PluginService]
-    public ISigScanner SigScanner { get; private set; } = null!;
+    internal ISigScanner SigScanner { get; }
 
-    [PluginService]
-    public IGameInteropProvider GameInteropProvider { get; private set; } = null!;
+    internal IGameInteropProvider GameInteropProvider { get; }
 
-    [PluginService]
-    public IPluginLog Log { get; private set; } = null!;
+    internal IPluginLog Log { get; }
 }

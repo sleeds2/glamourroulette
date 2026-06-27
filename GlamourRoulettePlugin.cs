@@ -52,9 +52,9 @@ public sealed class GlamourRoulettePlugin : IDalamudPlugin
         this.configuration.Initialize(this.services.PluginInterface);
 
         this.glamourPlateService = new GlamourPlateService(this.services, this.configuration);
-        this.configWindow = new ConfigWindow(this.configuration, this.glamourPlateService);
+        this.configWindow = new ConfigWindow(this.services, this.configuration, this.glamourPlateService);
         this.windowSystem.AddWindow(this.configWindow);
-        this.commandHandler = new CommandHandler(this.services, this.configuration, this.glamourPlateService, this.configWindow);
+        this.commandHandler = new CommandHandler(this.services, this.glamourPlateService, this.configWindow);
 
         this.services.PluginInterface.UiBuilder.Draw += this.windowSystem.Draw;
         this.services.PluginInterface.UiBuilder.OpenConfigUi += this.configWindow.Toggle;

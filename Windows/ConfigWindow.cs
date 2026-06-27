@@ -2,18 +2,21 @@ using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Windowing;
 using GlamourRoulette.Configuration;
 using GlamourRoulette.Game;
+using GlamourRoulette.Services;
 using System.Numerics;
 
 namespace GlamourRoulette.Windows;
 
 internal sealed class ConfigWindow : Window
 {
+    private readonly PluginServices services;
     private readonly PluginConfiguration configuration;
     private readonly GlamourPlateService glamourPlateService;
 
-    public ConfigWindow(PluginConfiguration configuration, GlamourPlateService glamourPlateService)
+    public ConfigWindow(PluginServices services, PluginConfiguration configuration, GlamourPlateService glamourPlateService)
         : base("Glamour Roulette Settings##ConfigWindow")
     {
+        this.services = services;
         this.configuration = configuration;
         this.glamourPlateService = glamourPlateService;
         this.Size = new Vector2(360, 560);
@@ -22,16 +25,28 @@ internal sealed class ConfigWindow : Window
 
     public override void Draw()
     {
-        var enableChatMessages = this.configuration.EnableChatMessages;
-        if (ImGui.Checkbox("Post results to chat", ref enableChatMessages))
+        if (ImGui.Button("Roll random glamour plate"))
         {
-            this.configuration.EnableChatMessages = enableChatMessages;
-            this.configuration.Save();
+            var result = this.glamourPlateService.ApplyRandomPlate();
+            this.services.ChatGui.Print(result.Message);
+        }
+
+        ImGui.SameLine();
+        if (ImGui.Button("Open Glamour Plate UI"))
+        {
+            var result = this.glamourPlateService.OpenGlamourPlateUi();
+            if (!result.Success)
+            {
+                this.services.ChatGui.Print(result.Message);
+            }
         }
 
         ImGui.Separator();
         ImGui.TextUnformatted("Glamour plates");
-        ImGui.TextWrapped("Enable the saved, non-empty glamour plates that should be included when Glamour Roulette randomly selects a plate. Empty glamour plates are never selected.");
+        ImGui.TextWrapped("Enable the glamour plates that should be included when Glamour Roulette randomly selects a plate.");
+        ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1.0f, 0.2f, 0.2f, 1.0f));
+        ImGui.TextWrapped("Please disable any empty glamour plates.");
+        ImGui.PopStyleColor();
 
         if (ImGui.BeginTable("##GlamourPlateSettingsTable", 2, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
         {
@@ -41,7 +56,7 @@ internal sealed class ConfigWindow : Window
 
             foreach (var plate in this.glamourPlateService.GetAvailablePlates())
             {
-                var enabled = this.configuration.IsPlateEligible(plate.Number, plate.IsEmpty);
+                var enabled = this.configuration.IsPlateEligible(plate.Number);
 
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
@@ -49,19 +64,9 @@ internal sealed class ConfigWindow : Window
 
                 ImGui.TableNextColumn();
                 ImGui.PushID(plate.Number);
-                if (plate.IsEmpty)
-                {
-                    ImGui.BeginDisabled();
-                }
-
                 if (ImGui.Checkbox("##PlateEnabled", ref enabled))
                 {
                     this.configuration.SetPlateEligibility(plate.Number, enabled);
-                }
-
-                if (plate.IsEmpty)
-                {
-                    ImGui.EndDisabled();
                 }
 
                 ImGui.PopID();

@@ -9,11 +9,9 @@ public sealed class PluginConfiguration : IPluginConfiguration
 
     public int Version { get; set; } = 2;
 
-    public bool EnableChatMessages { get; set; } = true;
-
     /// <summary>
     /// Explicit per-plate eligibility settings keyed by glamour plate number.
-    /// Missing plate numbers use the default behavior: enabled for non-empty plates.
+    /// Missing plate numbers use the default behavior: enabled.
     /// </summary>
     public Dictionary<int, bool> PlateEligibility { get; set; } = new();
 
@@ -26,9 +24,9 @@ public sealed class PluginConfiguration : IPluginConfiguration
         this.RemoveInvalidPlateEligibilityEntries();
     }
 
-    public bool IsPlateEligible(int plateNumber, bool isPlateEmpty = false)
+    public bool IsPlateEligible(int plateNumber)
     {
-        if (!IsValidPlateNumber(plateNumber) || isPlateEmpty)
+        if (!IsValidPlateNumber(plateNumber))
         {
             return false;
         }
@@ -52,11 +50,11 @@ public sealed class PluginConfiguration : IPluginConfiguration
         this.Save();
     }
 
-    public IEnumerable<int> GetEligiblePlateNumbers(Func<int, bool>? isPlateEmpty = null)
+    public IEnumerable<int> GetEligiblePlateNumbers()
     {
         for (var plateNumber = 1; plateNumber <= MaxGlamourPlateCount; plateNumber++)
         {
-            if (this.IsPlateEligible(plateNumber, isPlateEmpty?.Invoke(plateNumber) ?? false))
+            if (this.IsPlateEligible(plateNumber))
             {
                 yield return plateNumber;
             }

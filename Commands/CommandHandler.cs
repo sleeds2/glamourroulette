@@ -2,7 +2,7 @@ using Dalamud.Game.Command;
 using GlamourRoulette.Configuration;
 using GlamourRoulette.Game;
 using GlamourRoulette.Services;
-using GlamourRoulette.UI;
+using GlamourRoulette.Windows;
 
 namespace GlamourRoulette.Commands;
 
@@ -15,22 +15,22 @@ internal sealed class CommandHandler : IDisposable
     private readonly PluginServices services;
     private readonly PluginConfiguration configuration;
     private readonly GlamourPlateService glamourPlateService;
-    private readonly PluginUi ui;
+    private readonly ConfigWindow configWindow;
 
     public CommandHandler(
         PluginServices services,
         PluginConfiguration configuration,
         GlamourPlateService glamourPlateService,
-        PluginUi ui)
+        ConfigWindow configWindow)
     {
         this.services = services;
         this.configuration = configuration;
         this.glamourPlateService = glamourPlateService;
-        this.ui = ui;
+        this.configWindow = configWindow;
 
         var commandInfo = new CommandInfo(this.OnCommand)
         {
-            HelpMessage = "Choose a random enabled glamour plate, or use 'config' to open Glamour Roulette settings.",
+            HelpMessage = "Choose a random enabled glamour plate, or use 'config' or 'settings' to open Glamour Roulette settings.",
             ShowInHelp = true,
         };
 
@@ -63,7 +63,7 @@ internal sealed class CommandHandler : IDisposable
         if (trimmedArguments.Equals("config", StringComparison.OrdinalIgnoreCase)
             || trimmedArguments.Equals("settings", StringComparison.OrdinalIgnoreCase))
         {
-            this.ui.ToggleMainWindow();
+            this.configWindow.IsOpen = true;
         }
     }
 }

@@ -1,4 +1,5 @@
 using Dalamud.Game.ClientState.Conditions;
+using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using GlamourRoulette.Configuration;
 using GlamourRoulette.Services;
@@ -138,7 +139,7 @@ internal sealed class GlamourPlateApplier
             return true;
         }
 
-        if (!this.services.Condition[ConditionFlag.InSanctuary])
+        if (!this.IsInSanctuary())
         {
             failureMessage = "Glamour plates can only be applied in sanctuaries, cities, residential areas, and inns.";
             return true;
@@ -155,6 +156,15 @@ internal sealed class GlamourPlateApplier
 
         failureMessage = string.Empty;
         return false;
+    }
+
+    private bool IsInSanctuary()
+    {
+        unsafe
+        {
+            var territoryInfo = TerritoryInfo.Instance();
+            return territoryInfo is not null && territoryInfo->InSanctuary;
+        }
     }
 
     private bool IsPlateNumberAvailable(int plateNumber)

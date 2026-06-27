@@ -17,18 +17,12 @@ public sealed class PluginConfiguration : IPluginConfiguration
     /// </summary>
     public Dictionary<int, bool> PlateEligibility { get; set; } = new();
 
-    /// <summary>
-    /// Legacy v1 setting retained only to migrate existing user configurations.
-    /// </summary>
-    public List<int>? EnabledPlateNumbers { get; set; }
-
     [NonSerialized]
     private IDalamudPluginInterface? pluginInterface;
 
     public void Initialize(IDalamudPluginInterface dalamudPluginInterface)
     {
         this.pluginInterface = dalamudPluginInterface;
-        this.MigrateLegacyEnabledPlateNumbers();
         this.RemoveInvalidPlateEligibilityEntries();
     }
 
@@ -78,28 +72,6 @@ public sealed class PluginConfiguration : IPluginConfiguration
     private static bool IsValidPlateNumber(int plateNumber)
     {
         return plateNumber is >= 1 and <= MaxGlamourPlateCount;
-    }
-
-    private void MigrateLegacyEnabledPlateNumbers()
-    {
-        if (this.Version >= 2 || this.EnabledPlateNumbers is null || this.PlateEligibility.Count > 0)
-        {
-            this.Version = 2;
-            return;
-        }
-
-        var enabledPlateNumbers = this.EnabledPlateNumbers
-            .Where(IsValidPlateNumber)
-            .ToHashSet();
-
-        for (var plateNumber = 1; plateNumber <= MaxGlamourPlateCount; plateNumber++)
-        {
-            this.PlateEligibility[plateNumber] = enabledPlateNumbers.Contains(plateNumber);
-        }
-
-        this.Version = 2;
-        this.EnabledPlateNumbers = null;
-        this.Save();
     }
 
     private void RemoveInvalidPlateEligibilityEntries()

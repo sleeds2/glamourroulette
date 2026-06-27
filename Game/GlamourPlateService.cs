@@ -15,10 +15,17 @@ internal sealed class GlamourPlateService
         this.configuration = configuration;
     }
 
+    public IReadOnlyList<GlamourPlateInfo> GetAvailablePlates()
+    {
+        return Enumerable.Range(1, PluginConfiguration.MaxGlamourPlateCount)
+            .Select(static plate => new GlamourPlateInfo(plate, $"Plate {plate}"))
+            .ToList();
+    }
+
     public IReadOnlyList<GlamourPlateInfo> GetConfiguredPlates()
     {
-        return this.configuration.GetEligiblePlateNumbers()
-            .Select(static plate => new GlamourPlateInfo(plate, $"Plate {plate}"))
+        return this.GetAvailablePlates()
+            .Where(plate => this.configuration.IsPlateEligible(plate.Number))
             .ToList();
     }
 

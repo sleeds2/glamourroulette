@@ -15,15 +15,18 @@ internal sealed class CommandHandler : IDisposable
     private readonly PluginServices services;
     private readonly GlamourPlateService glamourPlateService;
     private readonly ConfigWindow configWindow;
+    private readonly PluginNotifier notifier;
 
     public CommandHandler(
         PluginServices services,
         GlamourPlateService glamourPlateService,
-        ConfigWindow configWindow)
+        ConfigWindow configWindow,
+        PluginNotifier notifier)
     {
         this.services = services;
         this.glamourPlateService = glamourPlateService;
         this.configWindow = configWindow;
+        this.notifier = notifier;
 
         var commandInfo = new CommandInfo(this.OnCommand)
         {
@@ -45,28 +48,35 @@ internal sealed class CommandHandler : IDisposable
 
     private void OnCommand(string command, string arguments)
     {
-        var trimmedArguments = arguments.Trim();
-        if (trimmedArguments.Length == 0)
+        try
         {
-            var result = this.glamourPlateService.ApplyRandomPlate();
-            this.services.ChatGui.Print(result.Message);
+            var trimmedArguments = arguments.Trim();
+            if (trimmedArguments.Length == 0)
+            {
+                var result = this.glamourPlateService.ApplyRandomPlate();
+                this.notifier.PrintResult(result);
 
-            return;
+                return;
+            }
+
+            if (trimmedArguments.Equals("config", StringComparison.OrdinalIgnoreCase)
+                || trimmedArguments.Equals("settings", StringComparison.OrdinalIgnoreCase))
+            {
+                this.configWindow.Toggle();
+                return;
+            }
+
+            if (trimmedArguments.Equals("help", StringComparison.OrdinalIgnoreCase))
+            {
+                this.notifier.Print(UsageMessage);
+                return;
+            }
+
+            this.notifier.Print($"Unknown Glamour Roulette command '{trimmedArguments}'. {UsageMessage}");
         }
-
-        if (trimmedArguments.Equals("config", StringComparison.OrdinalIgnoreCase)
-            || trimmedArguments.Equals("settings", StringComparison.OrdinalIgnoreCase))
+        catch (Exception ex)
         {
-            this.configWindow.Toggle();
-            return;
+            this.notifier.PrintUnexpectedError(ex, "handling a command");
         }
-
-        if (trimmedArguments.Equals("help", StringComparison.OrdinalIgnoreCase))
-        {
-            this.services.ChatGui.Print(UsageMessage);
-            return;
-        }
-
-        this.services.ChatGui.Print($"Unknown Glamour Roulette command '{trimmedArguments}'. {UsageMessage}");
     }
 }

@@ -9,16 +9,16 @@ namespace GlamourRoulette.Windows;
 
 internal sealed class ConfigWindow : Window
 {
-    private readonly PluginServices services;
     private readonly PluginConfiguration configuration;
     private readonly GlamourPlateService glamourPlateService;
+    private readonly PluginNotifier notifier;
 
-    public ConfigWindow(PluginServices services, PluginConfiguration configuration, GlamourPlateService glamourPlateService)
+    public ConfigWindow(PluginConfiguration configuration, GlamourPlateService glamourPlateService, PluginNotifier notifier)
         : base("Glamour Roulette Settings##ConfigWindow")
     {
-        this.services = services;
         this.configuration = configuration;
         this.glamourPlateService = glamourPlateService;
+        this.notifier = notifier;
         this.Size = new Vector2(360, 560);
         this.SizeCondition = ImGuiCond.FirstUseEver;
     }
@@ -27,8 +27,7 @@ internal sealed class ConfigWindow : Window
     {
         if (ImGui.Button("Roll random glamour plate"))
         {
-            var result = this.glamourPlateService.ApplyRandomPlate();
-            this.services.ChatGui.Print(result.Message);
+            this.ApplyRandomPlateFromConfigWindow();
         }
 
         ImGui.SameLine();
@@ -37,7 +36,7 @@ internal sealed class ConfigWindow : Window
             var result = this.glamourPlateService.OpenGlamourPlateUi();
             if (!result.Success)
             {
-                this.services.ChatGui.Print(result.Message);
+                this.notifier.PrintResult(result);
             }
         }
 
@@ -73,6 +72,19 @@ internal sealed class ConfigWindow : Window
             }
 
             ImGui.EndTable();
+        }
+    }
+
+    private void ApplyRandomPlateFromConfigWindow()
+    {
+        try
+        {
+            var result = this.glamourPlateService.ApplyRandomPlate();
+            this.notifier.PrintResult(result);
+        }
+        catch (Exception ex)
+        {
+            this.notifier.PrintUnexpectedError(ex, "applying a random glamour plate from the config window");
         }
     }
 }

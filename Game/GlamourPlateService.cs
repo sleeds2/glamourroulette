@@ -37,7 +37,15 @@ internal sealed class GlamourPlateService
 
     public IReadOnlyList<GlamourPlateInfo> GetSavedPlates()
     {
-        return this.savedPlateProvider();
+        try
+        {
+            return this.savedPlateProvider();
+        }
+        catch (Exception ex)
+        {
+            this.services.Log.Error(ex, "Failed to enumerate saved glamour plates");
+            return Array.Empty<GlamourPlateInfo>();
+        }
     }
 
     public IReadOnlyList<GlamourPlateInfo> GetConfiguredPlates()
@@ -65,18 +73,26 @@ internal sealed class GlamourPlateService
 
     public ApplyGlamourPlateResult ApplyRandomPlate()
     {
-        if (!this.services.ClientState.IsLoggedIn || this.services.ObjectTable.LocalPlayer is null)
+        try
         {
-            return ApplyGlamourPlateResult.Failed("A character must be logged in before choosing a glamour plate.");
-        }
+            if (!this.services.ClientState.IsLoggedIn || this.services.ObjectTable.LocalPlayer is null)
+            {
+                return ApplyGlamourPlateResult.Failed("A character must be logged in before choosing a glamour plate.");
+            }
 
-        var plate = this.SelectRandomPlate();
-        if (plate is null)
+            var plate = this.SelectRandomPlate();
+            if (plate is null)
+            {
+                return ApplyGlamourPlateResult.Failed(NoEligiblePlatesMessage);
+            }
+
+            return this.glamourPlateApplier.Apply(plate);
+        }
+        catch (Exception ex)
         {
-            return ApplyGlamourPlateResult.Failed(NoEligiblePlatesMessage);
+            this.services.Log.Error(ex, "Unexpected error while applying a random glamour plate");
+            return ApplyGlamourPlateResult.Failed("An unexpected error occurred while applying a random glamour plate. Check /xllog for details.");
         }
-
-        return this.glamourPlateApplier.Apply(plate);
     }
 
     public ApplyGlamourPlateResult OpenGlamourPlateUi()
@@ -167,7 +183,7 @@ internal sealed record ApplyGlamourPlateResult(bool Success, GlamourPlateInfo? P
 
     public static ApplyGlamourPlateResult Failed(string message) => new(false, null, ForChat(message));
 
-    private static string ForChat(string message)
+    internal static string ForChat(string message)
     {
         return message.StartsWith(ChatPrefix, StringComparison.Ordinal)
             ? message

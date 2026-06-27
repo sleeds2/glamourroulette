@@ -35,7 +35,7 @@ internal sealed class GlamourPlateService
 
     public ApplyGlamourPlateResult ApplyRandomPlate()
     {
-        if (this.services.ClientState.LocalPlayer is null)
+        if (!this.services.ClientState.IsLoggedIn || this.services.ObjectTable.LocalPlayer is null)
         {
             return ApplyGlamourPlateResult.Failed("A character must be logged in before choosing a glamour plate.");
         }

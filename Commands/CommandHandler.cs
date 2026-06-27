@@ -11,6 +11,7 @@ internal sealed class CommandHandler : IDisposable
     private const string MainCommand = "/glamourroulette";
     private const string AliasCommand = "/glamroulette";
     private const string ShortCommand = "/gr";
+    private const string UsageMessage = "Usage: /glamourroulette [config|settings|help]. Aliases: /glamroulette, /gr.";
 
     private readonly PluginServices services;
     private readonly PluginConfiguration configuration;
@@ -30,7 +31,7 @@ internal sealed class CommandHandler : IDisposable
 
         var commandInfo = new CommandInfo(this.OnCommand)
         {
-            HelpMessage = "Choose a random enabled glamour plate, or use 'config' or 'settings' to open Glamour Roulette settings.",
+            HelpMessage = "Choose a random enabled glamour plate. Subcommands: config/settings, help.",
             ShowInHelp = true,
         };
 
@@ -49,7 +50,7 @@ internal sealed class CommandHandler : IDisposable
     private void OnCommand(string command, string arguments)
     {
         var trimmedArguments = arguments.Trim();
-        if (trimmedArguments.Length == 0 || trimmedArguments.Equals("roll", StringComparison.OrdinalIgnoreCase))
+        if (trimmedArguments.Length == 0)
         {
             var result = this.glamourPlateService.ApplyRandomPlate();
             if (this.configuration.EnableChatMessages)
@@ -63,7 +64,16 @@ internal sealed class CommandHandler : IDisposable
         if (trimmedArguments.Equals("config", StringComparison.OrdinalIgnoreCase)
             || trimmedArguments.Equals("settings", StringComparison.OrdinalIgnoreCase))
         {
-            this.configWindow.IsOpen = true;
+            this.configWindow.Toggle();
+            return;
         }
+
+        if (trimmedArguments.Equals("help", StringComparison.OrdinalIgnoreCase))
+        {
+            this.services.ChatGui.Print(UsageMessage);
+            return;
+        }
+
+        this.services.ChatGui.Print($"Unknown Glamour Roulette command '{trimmedArguments}'. {UsageMessage}");
     }
 }

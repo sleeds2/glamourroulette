@@ -138,6 +138,12 @@ internal sealed class GlamourPlateApplier
             return true;
         }
 
+        if (!this.services.Condition[ConditionFlag.InSanctuary])
+        {
+            failureMessage = "Glamour plates can only be applied in sanctuaries, cities, residential areas, and inns.";
+            return true;
+        }
+
         if (this.services.Condition[ConditionFlag.Occupied]
             || this.services.Condition[ConditionFlag.OccupiedInQuestEvent]
             || this.services.Condition[ConditionFlag.OccupiedInCutSceneEvent]

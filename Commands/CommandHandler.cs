@@ -45,18 +45,6 @@ internal sealed class CommandHandler : IDisposable
 
     private void OnCommand(string command, string arguments)
     {
-        try
-        {
-            this.HandleCommand(arguments);
-        }
-        catch (Exception ex)
-        {
-            this.services.ReportErrorToChat(ex, "Command");
-        }
-    }
-
-    private void HandleCommand(string arguments)
-    {
         var trimmedArguments = arguments.Trim();
         if (trimmedArguments.Length == 0)
         {

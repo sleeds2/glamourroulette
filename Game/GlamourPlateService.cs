@@ -100,8 +100,7 @@ internal sealed class GlamourPlateService
                 var agent = AgentMiragePrismMiragePlate.Instance();
                 if (agent is null || agent->Data is null)
                 {
-                    this.services.Log.Debug("Glamour plate data is unavailable; treating plate {PlateNumber} as empty", plateNumber);
-                    return true;
+                    return this.GetCachedPlateEmptyStateOrDefault(plateNumber);
                 }
 
                 var plateIndex = plateNumber - 1;
@@ -111,22 +110,36 @@ internal sealed class GlamourPlateService
                     return true;
                 }
 
+                var isEmpty = true;
                 foreach (var item in glamourPlates[plateIndex].Items)
                 {
                     if (item.ItemId != 0)
                     {
-                        return false;
+                        isEmpty = false;
+                        break;
                     }
                 }
 
-                return true;
+                this.configuration.SetCachedPlateEmptyState(plateNumber, isEmpty);
+                return isEmpty;
             }
         }
         catch (Exception ex)
         {
-            this.services.Log.Warning(ex, "Failed to read glamour plate {PlateNumber}; treating it as empty", plateNumber);
-            return true;
+            this.services.Log.Warning(ex, "Failed to read glamour plate {PlateNumber}; using cached empty state", plateNumber);
+            return this.GetCachedPlateEmptyStateOrDefault(plateNumber);
         }
+    }
+
+    private bool GetCachedPlateEmptyStateOrDefault(int plateNumber)
+    {
+        if (this.configuration.TryGetCachedPlateEmptyState(plateNumber, out var isEmpty))
+        {
+            return isEmpty;
+        }
+
+        this.services.Log.Debug("No cached glamour plate state for plate {PlateNumber}; treating it as empty", plateNumber);
+        return true;
     }
 }
 

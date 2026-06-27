@@ -127,18 +127,6 @@ internal sealed class GlamourPlateApplier
 
     private bool IsBlockedByCondition(out string failureMessage)
     {
-        if (this.services.Condition[ConditionFlag.InCombat])
-        {
-            failureMessage = "Glamour plates cannot be applied while in combat.";
-            return true;
-        }
-
-        if (this.services.Condition[ConditionFlag.BetweenAreas] || this.services.Condition[ConditionFlag.BetweenAreas51])
-        {
-            failureMessage = "Glamour plates cannot be applied while changing areas.";
-            return true;
-        }
-
         if (!this.IsInSanctuary())
         {
             failureMessage = "Glamour plates can only be applied in sanctuaries, cities, residential areas, and inns.";

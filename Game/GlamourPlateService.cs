@@ -5,8 +5,6 @@ namespace GlamourRoulette.Game;
 
 internal sealed class GlamourPlateService
 {
-    private const int MaxGlamourPlateCount = 20;
-
     private readonly PluginServices services;
     private readonly PluginConfiguration configuration;
     private readonly Random random = new();
@@ -19,10 +17,7 @@ internal sealed class GlamourPlateService
 
     public IReadOnlyList<GlamourPlateInfo> GetConfiguredPlates()
     {
-        return this.configuration.EnabledPlateNumbers
-            .Where(static plate => plate is >= 1 and <= MaxGlamourPlateCount)
-            .Distinct()
-            .Order()
+        return this.configuration.GetEligiblePlateNumbers()
             .Select(static plate => new GlamourPlateInfo(plate, $"Plate {plate}"))
             .ToList();
     }

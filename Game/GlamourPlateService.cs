@@ -83,6 +83,7 @@ internal sealed class GlamourPlateService
     {
         if (!this.glamourPlateApplier.TryGetCurrentGearsetId(out var gearsetId, out var stateFailure))
         {
+            this.services.Log.Warning("glamour_plate_ui_open_failed message={Message}", stateFailure);
             return ApplyGlamourPlateResult.Failed(stateFailure);
         }
 

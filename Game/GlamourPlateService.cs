@@ -1,3 +1,4 @@
+using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using GlamourRoulette.Configuration;
 using GlamourRoulette.Services;
 
@@ -87,11 +88,44 @@ internal sealed class GlamourPlateService
 
     private bool IsGlamourPlateEmpty(int plateNumber)
     {
-        // The default implementation keeps the plugin's current plate discovery behavior until the
-        // native glamour plate storage reader is wired in.  The selection pipeline still treats this
-        // value as authoritative, so injected or future real empty-plate data is always excluded even
-        // when the user has enabled the plate in configuration.
-        return false;
+        if (plateNumber is < 1 or > PluginConfiguration.MaxGlamourPlateCount)
+        {
+            return true;
+        }
+
+        try
+        {
+            unsafe
+            {
+                var agent = AgentMiragePrismMiragePlate.Instance();
+                if (agent is null || agent->Data is null)
+                {
+                    return false;
+                }
+
+                var plateIndex = plateNumber - 1;
+                var glamourPlates = agent->Data->GlamourPlates;
+                if (plateIndex >= glamourPlates.Length)
+                {
+                    return true;
+                }
+
+                foreach (var item in glamourPlates[plateIndex].Items)
+                {
+                    if (item.ItemId != 0)
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+        }
+        catch (Exception ex)
+        {
+            this.services.Log.Warning(ex, "Failed to read glamour plate {PlateNumber}; treating it as non-empty", plateNumber);
+            return false;
+        }
     }
 }
 

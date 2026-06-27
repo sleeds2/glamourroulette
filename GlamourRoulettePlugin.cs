@@ -57,12 +57,12 @@ public sealed class GlamourRoulettePlugin : IDalamudPlugin
         this.commandHandler = new CommandHandler(this.services, this.configuration, this.glamourPlateService, this.configWindow);
 
         this.services.PluginInterface.UiBuilder.Draw += this.windowSystem.Draw;
-        this.services.PluginInterface.UiBuilder.OpenMainUi += this.configWindow.Toggle;
+        this.services.PluginInterface.UiBuilder.OpenConfigUi += this.configWindow.Toggle;
     }
 
     public void Dispose()
     {
-        this.services.PluginInterface.UiBuilder.OpenMainUi -= this.configWindow.Toggle;
+        this.services.PluginInterface.UiBuilder.OpenConfigUi -= this.configWindow.Toggle;
         this.services.PluginInterface.UiBuilder.Draw -= this.windowSystem.Draw;
 
         this.commandHandler.Dispose();

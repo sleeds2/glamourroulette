@@ -10,7 +10,6 @@ Don't know what to wear tonight? `Glamour Roulette` has you covered!
 - `/glamourroulette config` or `/glamourroulette settings` - toggle the configuration window.
 - `/glamourroulette help` - show command usage.
 - Use the configuration window to choose which glamour plate slots are eligible for roulette.
-- Use **Open Glamour Plate UI** from the configuration window to open the game's glamour plate interface for your current gearset.
 
 ## Requirements and limitations
 

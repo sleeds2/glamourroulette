@@ -16,7 +16,7 @@ internal sealed class ConfigWindow : Window
     {
         this.configuration = configuration;
         this.glamourPlateService = glamourPlateService;
-        this.Size = new Vector2(460, 560);
+        this.Size = new Vector2(360, 560);
         this.SizeCondition = ImGuiCond.FirstUseEver;
     }
 
@@ -33,10 +33,9 @@ internal sealed class ConfigWindow : Window
         ImGui.TextUnformatted("Glamour plates");
         ImGui.TextWrapped("Enable the saved, non-empty glamour plates that should be included when Glamour Roulette randomly selects a plate. Empty glamour plates are never selected.");
 
-        if (ImGui.BeginTable("##GlamourPlateSettingsTable", 3, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
+        if (ImGui.BeginTable("##GlamourPlateSettingsTable", 2, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
         {
             ImGui.TableSetupColumn("Plate", ImGuiTableColumnFlags.WidthStretch, 2.0f);
-            ImGui.TableSetupColumn("Random selection", ImGuiTableColumnFlags.WidthStretch, 1.4f);
             ImGui.TableSetupColumn("Enabled", ImGuiTableColumnFlags.WidthFixed, 85.0f);
             ImGui.TableHeadersRow();
 
@@ -47,9 +46,6 @@ internal sealed class ConfigWindow : Window
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
                 ImGui.TextUnformatted(string.IsNullOrWhiteSpace(plate.Name) ? $"Plate {plate.Number}" : plate.Name);
-
-                ImGui.TableNextColumn();
-                ImGui.TextUnformatted(plate.IsEmpty ? "Empty" : enabled ? "Enabled" : "Disabled");
 
                 ImGui.TableNextColumn();
                 ImGui.PushID(plate.Number);

@@ -31,7 +31,7 @@ internal sealed class ConfigWindow : Window
 
         ImGui.Separator();
         ImGui.TextUnformatted("Glamour plates");
-        ImGui.TextWrapped("Enable the glamour plates that should be included when Glamour Roulette randomly selects a plate.");
+        ImGui.TextWrapped("Enable the saved, non-empty glamour plates that should be included when Glamour Roulette randomly selects a plate. Empty glamour plates are never selected.");
 
         if (ImGui.BeginTable("##GlamourPlateSettingsTable", 3, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
         {
@@ -42,20 +42,30 @@ internal sealed class ConfigWindow : Window
 
             foreach (var plate in this.glamourPlateService.GetAvailablePlates())
             {
-                var enabled = this.configuration.IsPlateEligible(plate.Number);
+                var enabled = this.configuration.IsPlateEligible(plate.Number, plate.IsEmpty);
 
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
                 ImGui.TextUnformatted(string.IsNullOrWhiteSpace(plate.Name) ? $"Plate {plate.Number}" : plate.Name);
 
                 ImGui.TableNextColumn();
-                ImGui.TextUnformatted(enabled ? "Enabled" : "Disabled");
+                ImGui.TextUnformatted(plate.IsEmpty ? "Empty" : enabled ? "Enabled" : "Disabled");
 
                 ImGui.TableNextColumn();
                 ImGui.PushID(plate.Number);
+                if (plate.IsEmpty)
+                {
+                    ImGui.BeginDisabled();
+                }
+
                 if (ImGui.Checkbox("##PlateEnabled", ref enabled))
                 {
                     this.configuration.SetPlateEligibility(plate.Number, enabled);
+                }
+
+                if (plate.IsEmpty)
+                {
+                    ImGui.EndDisabled();
                 }
 
                 ImGui.PopID();

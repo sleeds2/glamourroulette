@@ -20,6 +20,7 @@ public sealed class GlamourRoulettePlugin : IDalamudPlugin
     public GlamourRoulettePlugin(IDalamudPluginInterface pluginInterface)
     {
         this.services = pluginInterface.Create<PluginServices>();
+        this.services.Initialize(pluginInterface);
 
         this.configuration = this.services.PluginInterface.GetPluginConfig() as PluginConfiguration ?? new PluginConfiguration();
         this.configuration.Initialize(this.services.PluginInterface);

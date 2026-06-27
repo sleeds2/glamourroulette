@@ -6,39 +6,43 @@ namespace GlamourRoulette.Services;
 
 internal sealed class PluginServices
 {
-    [PluginService]
-    internal IDalamudPluginInterface PluginInterface { get; private init; } = null!;
+    internal void Initialize(IDalamudPluginInterface pluginInterface)
+    {
+        this.PluginInterface = pluginInterface;
+    }
+
+    internal IDalamudPluginInterface PluginInterface { get; private set; } = null!;
 
     [PluginService]
-    internal ICommandManager CommandManager { get; private init; } = null!;
+    internal ICommandManager CommandManager { get; private set; } = null!;
 
     [PluginService]
-    internal IClientState ClientState { get; private init; } = null!;
+    internal IClientState ClientState { get; private set; } = null!;
 
     [PluginService]
-    internal ICondition Condition { get; private init; } = null!;
+    internal ICondition Condition { get; private set; } = null!;
 
     [PluginService]
-    internal IObjectTable ObjectTable { get; private init; } = null!;
+    internal IObjectTable ObjectTable { get; private set; } = null!;
 
     [PluginService]
-    internal IDataManager DataManager { get; private init; } = null!;
+    internal IDataManager DataManager { get; private set; } = null!;
 
     [PluginService]
-    internal IChatGui ChatGui { get; private init; } = null!;
+    internal IChatGui ChatGui { get; private set; } = null!;
 
     [PluginService]
-    internal IFramework Framework { get; private init; } = null!;
+    internal IFramework Framework { get; private set; } = null!;
 
     [PluginService]
-    internal IGameGui GameGui { get; private init; } = null!;
+    internal IGameGui GameGui { get; private set; } = null!;
 
     [PluginService]
-    internal ISigScanner SigScanner { get; private init; } = null!;
+    internal ISigScanner SigScanner { get; private set; } = null!;
 
     [PluginService]
-    internal IGameInteropProvider GameInteropProvider { get; private init; } = null!;
+    internal IGameInteropProvider GameInteropProvider { get; private set; } = null!;
 
     [PluginService]
-    internal IPluginLog Log { get; private init; } = null!;
+    internal IPluginLog Log { get; private set; } = null!;
 }

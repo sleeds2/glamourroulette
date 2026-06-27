@@ -27,7 +27,7 @@ internal sealed class GlamourPlateService
             .ToList();
     }
 
-    public GlamourPlateInfo? PickRandomPlate()
+    public GlamourPlateInfo PickRandomPlate()
     {
         var plates = this.GetConfiguredPlates();
         return plates.Count == 0 ? null : plates[this.random.Next(plates.Count)];
@@ -55,7 +55,7 @@ internal sealed class GlamourPlateService
 
 internal sealed record GlamourPlateInfo(int Number, string Name);
 
-internal sealed record ApplyGlamourPlateResult(bool Success, GlamourPlateInfo? Plate, string Message)
+internal sealed record ApplyGlamourPlateResult(bool Success, GlamourPlateInfo Plate, string Message)
 {
     public static ApplyGlamourPlateResult Succeeded(GlamourPlateInfo plate, string message) => new(true, plate, message);
 

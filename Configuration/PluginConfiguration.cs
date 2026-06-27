@@ -12,7 +12,7 @@ public sealed class PluginConfiguration : IPluginConfiguration
     public List<int> EnabledPlateNumbers { get; set; } = Enumerable.Range(1, 20).ToList();
 
     [NonSerialized]
-    private IDalamudPluginInterface? pluginInterface;
+    private IDalamudPluginInterface pluginInterface = null!;
 
     public void Initialize(IDalamudPluginInterface dalamudPluginInterface)
     {

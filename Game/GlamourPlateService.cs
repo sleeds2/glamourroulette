@@ -133,7 +133,16 @@ internal sealed record GlamourPlateInfo(int Number, string Name, bool IsEmpty = 
 
 internal sealed record ApplyGlamourPlateResult(bool Success, GlamourPlateInfo? Plate, string Message)
 {
-    public static ApplyGlamourPlateResult Succeeded(GlamourPlateInfo plate, string message) => new(true, plate, message);
+    internal const string ChatPrefix = "[Glamour Roulette]";
 
-    public static ApplyGlamourPlateResult Failed(string message) => new(false, null, message);
+    public static ApplyGlamourPlateResult Succeeded(GlamourPlateInfo plate, string message) => new(true, plate, ForChat(message));
+
+    public static ApplyGlamourPlateResult Failed(string message) => new(false, null, ForChat(message));
+
+    private static string ForChat(string message)
+    {
+        return message.StartsWith(ChatPrefix, StringComparison.Ordinal)
+            ? message
+            : $"{ChatPrefix} {message}";
+    }
 }

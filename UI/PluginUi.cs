@@ -56,23 +56,14 @@ internal sealed class PluginUi : IDisposable
 
             ImGui.Separator();
             ImGui.TextUnformatted("Enabled glamour plates");
+            ImGui.TextWrapped("By default, every non-empty glamour plate is eligible. Clear a plate below to exclude it from roulette rolls.");
 
-            for (var plate = 1; plate <= 20; plate++)
+            for (var plate = 1; plate <= PluginConfiguration.MaxGlamourPlateCount; plate++)
             {
-                var enabled = this.configuration.EnabledPlateNumbers.Contains(plate);
+                var enabled = this.configuration.IsPlateEligible(plate);
                 if (ImGui.Checkbox($"Plate {plate}", ref enabled))
                 {
-                    if (enabled)
-                    {
-                        this.configuration.EnabledPlateNumbers.Add(plate);
-                    }
-                    else
-                    {
-                        this.configuration.EnabledPlateNumbers.Remove(plate);
-                    }
-
-                    this.configuration.EnabledPlateNumbers = this.configuration.EnabledPlateNumbers.Distinct().Order().ToList();
-                    this.configuration.Save();
+                    this.configuration.SetPlateEligibility(plate, enabled);
                 }
             }
 

@@ -100,7 +100,8 @@ internal sealed class GlamourPlateService
                 var agent = AgentMiragePrismMiragePlate.Instance();
                 if (agent is null || agent->Data is null)
                 {
-                    return false;
+                    this.services.Log.Debug("Glamour plate data is unavailable; treating plate {PlateNumber} as empty", plateNumber);
+                    return true;
                 }
 
                 var plateIndex = plateNumber - 1;
@@ -123,8 +124,8 @@ internal sealed class GlamourPlateService
         }
         catch (Exception ex)
         {
-            this.services.Log.Warning(ex, "Failed to read glamour plate {PlateNumber}; treating it as non-empty", plateNumber);
-            return false;
+            this.services.Log.Warning(ex, "Failed to read glamour plate {PlateNumber}; treating it as empty", plateNumber);
+            return true;
         }
     }
 }

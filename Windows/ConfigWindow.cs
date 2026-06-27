@@ -43,6 +43,9 @@ internal sealed class ConfigWindow : Window
 
         ImGui.Separator();
         ImGui.TextWrapped("Enable the glamour plate slots that should be included when Glamour Roulette randomly selects a plate.");
+        ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1.0f, 0.2f, 0.2f, 1.0f));
+        ImGui.TextWrapped("Please disable any empty glamour plates.");
+        ImGui.PopStyleColor();
 
         if (ImGui.BeginTable("##GlamourPlateSettingsTable", 2, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
         {

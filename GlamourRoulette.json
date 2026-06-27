@@ -1,0 +1,12 @@
+{
+  "Name": "Glamour Roulette",
+  "Author": "sleeds2",
+  "Punchline": "Picks a random outfit!",
+  "Description": "Uses the command /glamourroulette to randomly apply a saved Glamour Plate.",
+  "RepoUrl": "https://github.com/sleeds2/glamourroulette",
+  "Tags": [
+    "glamour",
+    "randomizer",
+    "roulette"
+  ]
+}

@@ -1,15 +1,12 @@
 {
   "Name": "Glamour Roulette",
-  "Author": "Glamour Roulette Contributors",
-  "Punchline": "Randomize and apply saved glamour plates.",
-  "Description": "Adds commands and a small Dalamud UI for inspecting available glamour plates and applying a randomly selected plate from your configured pool.",
-  "RepoUrl": "https://github.com/your-org/glamourroulette",
+  "Author": "sleeds2",
+  "Punchline": "Picks a random outfit!",
+  "Description": "Uses the command /glamourroulette to randomly apply a saved Glamour Plate.",
+  "RepoUrl": "https://github.com/sleeds2/glamourroulette",
   "Tags": [
     "glamour",
-    "mirage plate",
+    "randomizer",
     "roulette"
-  ],
-  "CategoryTags": [
-    "utility"
   ]
 }

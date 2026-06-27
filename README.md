@@ -1,11 +1,20 @@
 # Glamour Roulette
 
-Glamour Roulette is a plugin for **Final Fantasy XIV** that randomly selects one of your saved Glamour Plates and swaps to it.
+Glamour Roulette is a plugin for **Final Fantasy XIV** that randomly selects one of your Glamour Plate slots and applies it to your current gearset.
 
 Don't know what to wear tonight? `Glamour Roulette` has you covered!
 
 ## Usage
 
-- `/glamourroulette`, `/glamroulette`, or `/gr` - choose a random enabled glamour plate and report the selected plate.
-- Add `config` or `settings` to toggle the configuration window.
-- Use the configuration window to choose which glamour plate numbers are eligible for roulette.
+- `/glamourroulette`, `/glamroulette`, or `/gr` - choose a random enabled glamour plate slot and apply it to your current gearset.
+- `/glamourroulette config` or `/glamourroulette settings` - toggle the configuration window.
+- `/glamourroulette help` - show command usage.
+- Use the configuration window to choose which glamour plate slots are eligible for roulette.
+- Use **Open Glamour Plate UI** from the configuration window to open the game's glamour plate interface for your current gearset.
+
+## Requirements and limitations
+
+- You must be logged in on a character with a valid active gearset.
+- Glamour plates can only be applied in sanctuaries, cities, residential areas, and inns.
+- Glamour plates cannot be applied while mounted, occupied, in quest events, or in cutscenes.
+- Glamour Roulette treats all 20 glamour plate slots as available. If a slot is enabled in the configuration, it can be selected by roulette.

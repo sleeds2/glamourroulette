@@ -22,11 +22,6 @@ internal sealed class GlamourPlateApplier
             return this.Fail($"Glamour plate {plate.Number} is unavailable.");
         }
 
-        if (plate.IsEmpty)
-        {
-            return this.Fail($"Glamour plate {plate.Number} is empty and cannot be applied.");
-        }
-
         if (!this.TryGetCurrentGearsetId(out var gearsetId, out var stateFailure))
         {
             return this.Fail(stateFailure);
@@ -66,7 +61,7 @@ internal sealed class GlamourPlateApplier
         }
     }
 
-    internal bool TryGetCurrentGearsetId(out int gearsetId, out string failureMessage)
+    internal bool TryGetCurrentGearsetId(out int gearsetId, out string failureMessage, bool requireApplicableState = true)
     {
         gearsetId = -1;
         failureMessage = string.Empty;
@@ -77,7 +72,7 @@ internal sealed class GlamourPlateApplier
             return false;
         }
 
-        if (this.IsBlockedByCondition(out failureMessage))
+        if (requireApplicableState && this.IsBlockedByCondition(out failureMessage))
         {
             return false;
         }

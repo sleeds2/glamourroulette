@@ -10,44 +10,26 @@ internal sealed class GlamourPlateService
 
     private readonly PluginServices services;
     private readonly PluginConfiguration configuration;
-    private readonly Func<IReadOnlyList<GlamourPlateInfo>> savedPlateProvider;
     private readonly GlamourPlateApplier glamourPlateApplier;
     private readonly Random random = new();
 
     public GlamourPlateService(PluginServices services, PluginConfiguration configuration)
-        : this(services, configuration, null)
-    {
-    }
-
-    internal GlamourPlateService(
-        PluginServices services,
-        PluginConfiguration configuration,
-        Func<IReadOnlyList<GlamourPlateInfo>>? savedPlateProvider)
     {
         this.services = services;
         this.configuration = configuration;
-        this.savedPlateProvider = savedPlateProvider ?? this.EnumerateSavedGlamourPlates;
         this.glamourPlateApplier = new GlamourPlateApplier(services);
     }
 
-    public IReadOnlyList<GlamourPlateInfo> GetAvailablePlates()
+    public IReadOnlyList<GlamourPlateInfo> GetAllPlates()
     {
-        return this.GetSavedPlates();
-    }
-
-    public IReadOnlyList<GlamourPlateInfo> GetSavedPlates()
-    {
-        return this.savedPlateProvider();
-    }
-
-    public IReadOnlyList<GlamourPlateInfo> GetConfiguredPlates()
-    {
-        return this.GetEligiblePlates();
+        return Enumerable.Range(1, PluginConfiguration.MaxGlamourPlateCount)
+            .Select(plate => new GlamourPlateInfo(plate, $"Plate {plate}"))
+            .ToList();
     }
 
     public IReadOnlyList<GlamourPlateInfo> GetEligiblePlates()
     {
-        return this.GetSavedPlates()
+        return this.GetAllPlates()
             .Where(plate => this.configuration.IsPlateEligible(plate.Number))
             .ToList();
     }
@@ -81,7 +63,7 @@ internal sealed class GlamourPlateService
 
     public ApplyGlamourPlateResult OpenGlamourPlateUi()
     {
-        if (!this.glamourPlateApplier.TryGetCurrentGearsetId(out var gearsetId, out var stateFailure))
+        if (!this.glamourPlateApplier.TryGetCurrentGearsetId(out var gearsetId, out var stateFailure, requireApplicableState: false))
         {
             return ApplyGlamourPlateResult.Failed(stateFailure);
         }
@@ -106,58 +88,9 @@ internal sealed class GlamourPlateService
             return ApplyGlamourPlateResult.Failed("Failed to open the Glamour Plate UI: game API call failed.");
         }
     }
-
-    private IReadOnlyList<GlamourPlateInfo> EnumerateSavedGlamourPlates()
-    {
-        return Enumerable.Range(1, PluginConfiguration.MaxGlamourPlateCount)
-            .Select(plate => new GlamourPlateInfo(plate, $"Plate {plate}", this.IsGlamourPlateEmpty(plate)))
-            .ToList();
-    }
-
-    private bool IsGlamourPlateEmpty(int plateNumber)
-    {
-        if (plateNumber is < 1 or > PluginConfiguration.MaxGlamourPlateCount)
-        {
-            return true;
-        }
-
-        try
-        {
-            unsafe
-            {
-                var agent = AgentMiragePrismMiragePlate.Instance();
-                if (agent is null || agent->Data is null)
-                {
-                    return false;
-                }
-
-                var plateIndex = plateNumber - 1;
-                var glamourPlates = agent->Data->GlamourPlates;
-                if (plateIndex >= glamourPlates.Length)
-                {
-                    return true;
-                }
-
-                foreach (var item in glamourPlates[plateIndex].Items)
-                {
-                    if (item.ItemId != 0)
-                    {
-                        return false;
-                    }
-                }
-
-                return true;
-            }
-        }
-        catch (Exception ex)
-        {
-            this.services.Log.Warning(ex, "Failed to read glamour plate {PlateNumber}; leaving it enabled", plateNumber);
-            return false;
-        }
-    }
 }
 
-internal sealed record GlamourPlateInfo(int Number, string Name, bool IsEmpty = false);
+internal sealed record GlamourPlateInfo(int Number, string Name);
 
 internal sealed record ApplyGlamourPlateResult(bool Success, GlamourPlateInfo? Plate, string Message)
 {

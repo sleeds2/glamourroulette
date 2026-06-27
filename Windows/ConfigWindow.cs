@@ -12,6 +12,7 @@ internal sealed class ConfigWindow : Window
     private readonly PluginServices services;
     private readonly PluginConfiguration configuration;
     private readonly GlamourPlateService glamourPlateService;
+    private string? lastReportedDrawError;
 
     public ConfigWindow(PluginServices services, PluginConfiguration configuration, GlamourPlateService glamourPlateService)
         : base("Glamour Roulette Settings##ConfigWindow")
@@ -24,6 +25,25 @@ internal sealed class ConfigWindow : Window
     }
 
     public override void Draw()
+    {
+        try
+        {
+            this.DrawContents();
+            this.lastReportedDrawError = null;
+        }
+        catch (Exception ex)
+        {
+            if (this.lastReportedDrawError != ex.Message)
+            {
+                this.services.ReportErrorToChat(ex, "Configuration window");
+                this.lastReportedDrawError = ex.Message;
+            }
+
+            ImGui.TextWrapped("Glamour Roulette could not draw the configuration window. Check chat or the plugin log for details.");
+        }
+    }
+
+    private void DrawContents()
     {
         if (ImGui.Button("Roll random glamour plate"))
         {

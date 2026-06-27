@@ -5,6 +5,8 @@ namespace GlamourRoulette.Services;
 
 internal sealed class PluginServices
 {
+    private const string ChatPrefix = "[Glamour Roulette]";
+
     public PluginServices(
         IDalamudPluginInterface pluginInterface,
         ICommandManager commandManager,
@@ -56,4 +58,15 @@ internal sealed class PluginServices
     internal IGameInteropProvider GameInteropProvider { get; }
 
     internal IPluginLog Log { get; }
+
+    internal void ReportErrorToChat(Exception exception, string action)
+    {
+        this.Log.Error(exception, "{Action} failed", action);
+
+        var message = string.IsNullOrWhiteSpace(exception.Message)
+            ? exception.GetType().Name
+            : exception.Message;
+
+        this.ChatGui.Print($"{ChatPrefix} {action} failed: {message}");
+    }
 }

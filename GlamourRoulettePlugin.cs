@@ -19,7 +19,8 @@ public sealed class GlamourRoulettePlugin : IDalamudPlugin
 
     public GlamourRoulettePlugin(IDalamudPluginInterface pluginInterface)
     {
-        this.services = pluginInterface.Create<PluginServices>();
+        this.services = pluginInterface.Create<PluginServices>()
+            ?? throw new InvalidOperationException("Failed to create Glamour Roulette plugin services.");
         this.services.Initialize(pluginInterface);
 
         this.configuration = this.services.PluginInterface.GetPluginConfig() as PluginConfiguration ?? new PluginConfiguration();

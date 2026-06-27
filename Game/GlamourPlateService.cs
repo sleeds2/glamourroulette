@@ -6,7 +6,7 @@ namespace GlamourRoulette.Game;
 
 internal sealed class GlamourPlateService
 {
-    private const string NoEligiblePlatesMessage = "No saved, non-empty glamour plates are enabled in the Glamour Roulette configuration.";
+    private const string NoEligiblePlatesMessage = "No glamour plates are enabled in the Glamour Roulette configuration.";
 
     private readonly PluginServices services;
     private readonly PluginConfiguration configuration;
@@ -48,7 +48,7 @@ internal sealed class GlamourPlateService
     public IReadOnlyList<GlamourPlateInfo> GetEligiblePlates()
     {
         return this.GetSavedPlates()
-            .Where(plate => !plate.IsEmpty && this.configuration.IsPlateEligible(plate.Number, plate.IsEmpty))
+            .Where(plate => this.configuration.IsPlateEligible(plate.Number))
             .ToList();
     }
 
@@ -77,6 +77,34 @@ internal sealed class GlamourPlateService
         }
 
         return this.glamourPlateApplier.Apply(plate);
+    }
+
+    public ApplyGlamourPlateResult OpenGlamourPlateUi()
+    {
+        if (!this.glamourPlateApplier.TryGetCurrentGearsetId(out var gearsetId, out var stateFailure))
+        {
+            return ApplyGlamourPlateResult.Failed(stateFailure);
+        }
+
+        try
+        {
+            unsafe
+            {
+                var agent = AgentMiragePrismMiragePlate.Instance();
+                if (agent is null)
+                {
+                    return ApplyGlamourPlateResult.Failed("The Glamour Plate UI is unavailable; please try again after changing areas.");
+                }
+
+                agent->OpenForGearset(gearsetId, 0);
+                return ApplyGlamourPlateResult.Succeeded(null, "Opened the Glamour Plate UI.");
+            }
+        }
+        catch (Exception ex)
+        {
+            this.services.Log.Error(ex, "Failed to open the Glamour Plate UI");
+            return ApplyGlamourPlateResult.Failed("Failed to open the Glamour Plate UI: game API call failed.");
+        }
     }
 
     private IReadOnlyList<GlamourPlateInfo> EnumerateSavedGlamourPlates()
@@ -123,7 +151,7 @@ internal sealed class GlamourPlateService
         }
         catch (Exception ex)
         {
-            this.services.Log.Warning(ex, "Failed to read glamour plate {PlateNumber}; treating it as non-empty", plateNumber);
+            this.services.Log.Warning(ex, "Failed to read glamour plate {PlateNumber}; leaving it enabled", plateNumber);
             return false;
         }
     }
@@ -135,7 +163,7 @@ internal sealed record ApplyGlamourPlateResult(bool Success, GlamourPlateInfo? P
 {
     internal const string ChatPrefix = "[Glamour Roulette]";
 
-    public static ApplyGlamourPlateResult Succeeded(GlamourPlateInfo plate, string message) => new(true, plate, ForChat(message));
+    public static ApplyGlamourPlateResult Succeeded(GlamourPlateInfo? plate, string message) => new(true, plate, ForChat(message));
 
     public static ApplyGlamourPlateResult Failed(string message) => new(false, null, ForChat(message));
 

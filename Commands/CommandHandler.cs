@@ -1,5 +1,4 @@
 using Dalamud.Game.Command;
-using GlamourRoulette.Configuration;
 using GlamourRoulette.Game;
 using GlamourRoulette.Services;
 using GlamourRoulette.Windows;
@@ -14,18 +13,15 @@ internal sealed class CommandHandler : IDisposable
     private const string UsageMessage = "Usage: /glamourroulette [config|settings|help]. Aliases: /glamroulette, /gr.";
 
     private readonly PluginServices services;
-    private readonly PluginConfiguration configuration;
     private readonly GlamourPlateService glamourPlateService;
     private readonly ConfigWindow configWindow;
 
     public CommandHandler(
         PluginServices services,
-        PluginConfiguration configuration,
         GlamourPlateService glamourPlateService,
         ConfigWindow configWindow)
     {
         this.services = services;
-        this.configuration = configuration;
         this.glamourPlateService = glamourPlateService;
         this.configWindow = configWindow;
 
@@ -53,10 +49,7 @@ internal sealed class CommandHandler : IDisposable
         if (trimmedArguments.Length == 0)
         {
             var result = this.glamourPlateService.ApplyRandomPlate();
-            if (this.configuration.EnableChatMessages)
-            {
-                this.services.ChatGui.Print(result.Message);
-            }
+            this.services.ChatGui.Print(result.Message);
 
             return;
         }

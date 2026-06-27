@@ -42,7 +42,7 @@ internal sealed class ConfigWindow : Window
         }
 
         ImGui.Separator();
-        ImGui.TextWrapped("Enable the glamour plates that should be included when Glamour Roulette randomly selects a plate.");
+        ImGui.TextWrapped("Enable the glamour plate slots that should be included when Glamour Roulette randomly selects a plate.");
         ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(1.0f, 0.2f, 0.2f, 1.0f));
         ImGui.TextWrapped("Please disable any empty glamour plates.");
         ImGui.PopStyleColor();
@@ -53,7 +53,7 @@ internal sealed class ConfigWindow : Window
             ImGui.TableSetupColumn("Enabled", ImGuiTableColumnFlags.WidthFixed, 85.0f);
             ImGui.TableHeadersRow();
 
-            foreach (var plate in this.glamourPlateService.GetAvailablePlates())
+            foreach (var plate in this.glamourPlateService.GetAllPlates())
             {
                 var enabled = this.configuration.IsPlateEligible(plate.Number);
 

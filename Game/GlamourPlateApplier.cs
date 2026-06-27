@@ -133,6 +133,12 @@ internal sealed class GlamourPlateApplier
             return true;
         }
 
+        if (this.services.Condition[ConditionFlag.Mounted])
+        {
+            failureMessage = "Glamour plates cannot be applied while mounted.";
+            return true;
+        }
+
         if (this.services.Condition[ConditionFlag.Occupied]
             || this.services.Condition[ConditionFlag.OccupiedInQuestEvent]
             || this.services.Condition[ConditionFlag.OccupiedInCutSceneEvent]

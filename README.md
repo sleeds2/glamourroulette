@@ -7,5 +7,6 @@ Don't know what to wear tonight? `Glamour Roulette` has you covered!
 ## Usage
 
 - `/glamourroulette`, `/glamroulette`, or `/gr` - choose a random enabled glamour plate and report the selected plate.
-- Add `config` or `settings` to any command to open/close the configuration window.
+- Add `config` or `settings` to toggle the configuration window.
+- Add `help` to print the supported subcommands.
 - Use the configuration window to choose which glamour plate numbers are eligible for roulette.

@@ -1,5 +1,7 @@
 using Dalamud.Interface.Windowing;
+using Dalamud.IoC;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using GlamourRoulette.Commands;
 using GlamourRoulette.Configuration;
 using GlamourRoulette.Game;
@@ -10,6 +12,19 @@ namespace GlamourRoulette;
 
 public sealed class GlamourRoulettePlugin : IDalamudPlugin
 {
+    [PluginService] internal static IDalamudPluginInterface PluginInterface { get; private set; } = null!;
+    [PluginService] internal static ICommandManager CommandManager { get; private set; } = null!;
+    [PluginService] internal static IClientState ClientState { get; private set; } = null!;
+    [PluginService] internal static ICondition Condition { get; private set; } = null!;
+    [PluginService] internal static IObjectTable ObjectTable { get; private set; } = null!;
+    [PluginService] internal static IDataManager DataManager { get; private set; } = null!;
+    [PluginService] internal static IChatGui ChatGui { get; private set; } = null!;
+    [PluginService] internal static IFramework Framework { get; private set; } = null!;
+    [PluginService] internal static IGameGui GameGui { get; private set; } = null!;
+    [PluginService] internal static ISigScanner SigScanner { get; private set; } = null!;
+    [PluginService] internal static IGameInteropProvider GameInteropProvider { get; private set; } = null!;
+    [PluginService] internal static IPluginLog Log { get; private set; } = null!;
+
     private readonly PluginServices services;
     private readonly PluginConfiguration configuration;
     private readonly GlamourPlateService glamourPlateService;
@@ -17,10 +32,21 @@ public sealed class GlamourRoulettePlugin : IDalamudPlugin
     private readonly ConfigWindow configWindow;
     private readonly CommandHandler commandHandler;
 
-    public GlamourRoulettePlugin(IDalamudPluginInterface pluginInterface)
+    public GlamourRoulettePlugin()
     {
-        this.services = pluginInterface.Create<PluginServices>();
-        this.services.Initialize(pluginInterface);
+        this.services = new PluginServices(
+            PluginInterface,
+            CommandManager,
+            ClientState,
+            Condition,
+            ObjectTable,
+            DataManager,
+            ChatGui,
+            Framework,
+            GameGui,
+            SigScanner,
+            GameInteropProvider,
+            Log);
 
         this.configuration = this.services.PluginInterface.GetPluginConfig() as PluginConfiguration ?? new PluginConfiguration();
         this.configuration.Initialize(this.services.PluginInterface);

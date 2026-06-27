@@ -10,6 +10,7 @@ internal sealed class GlamourPlateService
     private readonly PluginServices services;
     private readonly PluginConfiguration configuration;
     private readonly Func<IReadOnlyList<GlamourPlateInfo>> savedPlateProvider;
+    private readonly GlamourPlateApplier glamourPlateApplier;
     private readonly Random random = new();
 
     public GlamourPlateService(PluginServices services, PluginConfiguration configuration)
@@ -25,6 +26,7 @@ internal sealed class GlamourPlateService
         this.services = services;
         this.configuration = configuration;
         this.savedPlateProvider = savedPlateProvider ?? this.EnumerateSavedGlamourPlates;
+        this.glamourPlateApplier = new GlamourPlateApplier(services);
     }
 
     public IReadOnlyList<GlamourPlateInfo> GetAvailablePlates()
@@ -73,10 +75,7 @@ internal sealed class GlamourPlateService
             return ApplyGlamourPlateResult.Failed(NoEligiblePlatesMessage);
         }
 
-        // Placeholder by request: selecting the plate is wired, but the actual client call that applies
-        // the plate is intentionally left for a later change after the desired API surface is finalized.
-        this.services.Log.Information("glamour_plate_selected plateNumber={PlateNumber}", plate.Number);
-        return ApplyGlamourPlateResult.Succeeded(plate, $"Selected glamour plate {plate.Number}. Application is not implemented yet.");
+        return this.glamourPlateApplier.Apply(plate);
     }
 
     private IReadOnlyList<GlamourPlateInfo> EnumerateSavedGlamourPlates()

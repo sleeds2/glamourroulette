@@ -16,6 +16,9 @@ internal sealed class PluginServices
     internal IClientState ClientState { get; private init; } = null!;
 
     [PluginService]
+    internal ICondition Condition { get; private init; } = null!;
+
+    [PluginService]
     internal IObjectTable ObjectTable { get; private init; } = null!;
 
     [PluginService]

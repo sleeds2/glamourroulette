@@ -1,3 +1,5 @@
+using Dalamud.Game.ClientState.Conditions;
+using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using GlamourRoulette.Configuration;
 using GlamourRoulette.Services;
@@ -63,9 +65,19 @@ internal sealed class GlamourPlateService
 
     public ApplyGlamourPlateResult OpenGlamourPlateUi()
     {
-        if (!this.glamourPlateApplier.TryGetCurrentGearsetId(out var gearsetId, out var stateFailure, requireApplicableState: false))
+        if (!this.services.ClientState.IsLoggedIn || this.services.ObjectTable.LocalPlayer is null)
         {
-            return ApplyGlamourPlateResult.Failed(stateFailure);
+            return ApplyGlamourPlateResult.Failed("A character must be logged in before opening the Glamour Plate UI.");
+        }
+
+        if (!this.IsInSanctuary())
+        {
+            return ApplyGlamourPlateResult.Failed("Glamour plates can only be applied in sanctuaries, cities, residential areas, and inns.");
+        }
+
+        if (this.services.Condition[ConditionFlag.Mounted])
+        {
+            return ApplyGlamourPlateResult.Failed("Glamour plates cannot be applied while mounted.");
         }
 
         try
@@ -78,7 +90,7 @@ internal sealed class GlamourPlateService
                     return ApplyGlamourPlateResult.Failed("The Glamour Plate UI is unavailable; please try again after changing areas.");
                 }
 
-                agent->OpenForGearset(gearsetId, 0);
+                agent->Show();
                 return ApplyGlamourPlateResult.Succeeded(null, "Opened the Glamour Plate UI.");
             }
         }
@@ -86,6 +98,15 @@ internal sealed class GlamourPlateService
         {
             this.services.Log.Error(ex, "Failed to open the Glamour Plate UI");
             return ApplyGlamourPlateResult.Failed("Failed to open the Glamour Plate UI: game API call failed.");
+        }
+    }
+
+    private bool IsInSanctuary()
+    {
+        unsafe
+        {
+            var territoryInfo = TerritoryInfo.Instance();
+            return territoryInfo is not null && territoryInfo->InSanctuary;
         }
     }
 }

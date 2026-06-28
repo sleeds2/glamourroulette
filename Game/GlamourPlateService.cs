@@ -65,18 +65,7 @@ internal sealed class GlamourPlateService
     {
         if (!this.services.ClientState.IsLoggedIn || this.services.ObjectTable.LocalPlayer is null)
         {
-            return ApplyGlamourPlateResult.Failed("A character must be logged in before choosing a glamour plate.");
-        }
-
-        var plate = this.SelectRandomPlate();
-        if (plate is null)
-        {
-            return ApplyGlamourPlateResult.Failed(NoEligiblePlatesMessage);
-        }
-
-        if (!this.glamourPlateApplier.TryValidateApplicableState(out var stateFailure))
-        {
-            return ApplyGlamourPlateResult.Failed(stateFailure);
+            return ApplyGlamourPlateResult.Failed("A character must be logged in before opening the Glamour Plate UI.");
         }
 
         try

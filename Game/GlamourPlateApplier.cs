@@ -22,14 +22,9 @@ internal sealed class GlamourPlateApplier
             return this.Fail($"Glamour plate {plate.Number} is unavailable.");
         }
 
-        if (!this.TryValidateApplicableState(out var stateFailure))
+        if (!this.TryGetCurrentGearsetId(out var gearsetId, out var stateFailure))
         {
             return this.Fail(stateFailure);
-        }
-
-        if (!this.TryGetCurrentGearsetId(out var gearsetId, out var gearsetFailure))
-        {
-            return this.Fail(gearsetFailure);
         }
 
         var gearsetNumber = gearsetId + 1;
@@ -66,8 +61,9 @@ internal sealed class GlamourPlateApplier
         }
     }
 
-    internal bool TryValidateApplicableState(out string failureMessage)
+    internal bool TryGetCurrentGearsetId(out int gearsetId, out string failureMessage, bool requireApplicableState = true)
     {
+        gearsetId = -1;
         failureMessage = string.Empty;
 
         if (!this.services.ClientState.IsLoggedIn || this.services.ObjectTable.LocalPlayer is null)
@@ -76,13 +72,10 @@ internal sealed class GlamourPlateApplier
             return false;
         }
 
-        return !this.IsBlockedByCondition(out failureMessage);
-    }
-
-    internal bool TryGetCurrentGearsetId(out int gearsetId, out string failureMessage)
-    {
-        gearsetId = -1;
-        failureMessage = string.Empty;
+        if (requireApplicableState && this.IsBlockedByCondition(out failureMessage))
+        {
+            return false;
+        }
 
         try
         {

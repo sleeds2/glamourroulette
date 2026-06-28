@@ -35,7 +35,10 @@ internal sealed class ConfigWindow : Window
         if (ImGui.Button("Open Glamour Plate UI"))
         {
             var result = this.glamourPlateService.OpenGlamourPlateUi();
-            this.services.ChatGui.Print(result.Message);
+            if (!result.Success)
+            {
+                this.services.ChatGui.Print(result.Message);
+            }
         }
 
         ImGui.Separator();

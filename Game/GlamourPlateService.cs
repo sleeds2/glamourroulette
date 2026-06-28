@@ -63,9 +63,9 @@ internal sealed class GlamourPlateService
 
     public ApplyGlamourPlateResult OpenGlamourPlateUi()
     {
-        if (!this.glamourPlateApplier.TryGetCurrentGearsetId(out var gearsetId, out var stateFailure, requireApplicableState: false))
+        if (!this.services.ClientState.IsLoggedIn || this.services.ObjectTable.LocalPlayer is null)
         {
-            return ApplyGlamourPlateResult.Failed(stateFailure);
+            return ApplyGlamourPlateResult.Failed("A character must be logged in before opening the Glamour Plate UI.");
         }
 
         try
@@ -78,7 +78,7 @@ internal sealed class GlamourPlateService
                     return ApplyGlamourPlateResult.Failed("The Glamour Plate UI is unavailable; please try again after changing areas.");
                 }
 
-                agent->OpenForGearset(gearsetId, 0);
+                agent->Show();
                 return ApplyGlamourPlateResult.Succeeded(null, "Opened the Glamour Plate UI.");
             }
         }

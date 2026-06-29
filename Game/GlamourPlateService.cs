@@ -42,11 +42,6 @@ internal sealed class GlamourPlateService
         return plates.Count == 0 ? null : plates[this.random.Next(plates.Count)];
     }
 
-    public GlamourPlateInfo? PickRandomPlate()
-    {
-        return this.SelectRandomPlate();
-    }
-
     public ApplyGlamourPlateResult ApplyRandomPlate()
     {
         if (!this.services.ClientState.IsLoggedIn || this.services.ObjectTable.LocalPlayer is null)

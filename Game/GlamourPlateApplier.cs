@@ -59,7 +59,7 @@ internal sealed class GlamourPlateApplier
         }
     }
 
-    internal bool TryGetCurrentGearsetId(out int gearsetId, out string failureMessage, bool requireApplicableState = true)
+    private bool TryGetCurrentGearsetId(out int gearsetId, out string failureMessage, bool requireApplicableState = true)
     {
         gearsetId = -1;
         failureMessage = string.Empty;

@@ -7,12 +7,12 @@ Don't know what to wear tonight? `Glamour Roulette` has you covered!
 ## Usage
 
 - `/glamourroulette`, `/glamroulette`, or `/gr` - choose a random enabled glamour plate slot and apply it to your current gearset.
-- `/glamourroulette config` or `/glamourroulette settings` - toggle the configuration window.
-- `/glamourroulette help` - show command usage.
-- Use the configuration window to choose which glamour plate slots are eligible for roulette.
+  - Can also be run via a button in the settings window.
+- `/glamourroulette config` or `/glamourroulette settings` - toggle the settings window.
+- Use the settings window to choose which glamour plate slots are eligible for roulette.
 
 ## Requirements and limitations
 
-- You must be logged in on a character with a valid active gearset.
-- Glamour plates can only be applied in sanctuaries, cities, residential areas, and inns.
-- Glamour plates cannot be applied while mounted, occupied, in quest events, or in cutscenes.
+- You must have a **valid active gearset**.
+- Glamour plate UI and application follows standard in-game limitations.
+- Disable all empty glamour plates for the most seemless experience.

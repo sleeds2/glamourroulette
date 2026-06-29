@@ -23,7 +23,7 @@ internal sealed class GlamourPlateService
     public IReadOnlyList<GlamourPlateInfo> GetAllPlates()
     {
         return Enumerable.Range(1, PluginConfiguration.MaxGlamourPlateCount)
-            .Select(plate => new GlamourPlateInfo(plate, $"Plate {plate}"))
+            .Select(plate => new GlamourPlateInfo(plate))
             .ToList();
     }
 
@@ -90,7 +90,7 @@ internal sealed class GlamourPlateService
     }
 }
 
-internal sealed record GlamourPlateInfo(int Number, string Name);
+internal sealed record GlamourPlateInfo(int Number);
 
 internal sealed record ApplyGlamourPlateResult(bool Success, GlamourPlateInfo? Plate, string Message)
 {

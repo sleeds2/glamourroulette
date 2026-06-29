@@ -10,7 +10,7 @@ internal sealed class CommandHandler : IDisposable
     private const string MainCommand = "/glamourroulette";
     private const string AliasCommand = "/glamroulette";
     private const string ShortCommand = "/gr";
-    private const string UsageMessage = "Usage: /glamourroulette [config|settings|help]. Aliases: /glamroulette, /gr.";
+    private const string UsageMessage = "Usage: /glamourroulette [config|settings]. Aliases: /glamroulette, /gr.";
 
     private readonly PluginServices services;
     private readonly GlamourPlateService glamourPlateService;
@@ -25,15 +25,20 @@ internal sealed class CommandHandler : IDisposable
         this.glamourPlateService = glamourPlateService;
         this.configWindow = configWindow;
 
-        var commandInfo = new CommandInfo(this.OnCommand)
+        var mainCommandInfo = new CommandInfo(this.OnCommand)
         {
-            HelpMessage = "Choose a random enabled glamour plate. Subcommands: config/settings, help.",
+            HelpMessage = "Choose a random enabled glamour plate. Aliases: /glamroulette, /gr. Subcommands: config/settings.",
             ShowInHelp = true,
         };
+        
+        var aliasCommandInfo = new CommandInfo(this.OnCommand)
+        {
+            ShowInHelp = false,
+        };
 
-        this.services.CommandManager.AddHandler(MainCommand, commandInfo);
-        this.services.CommandManager.AddHandler(AliasCommand, commandInfo);
-        this.services.CommandManager.AddHandler(ShortCommand, commandInfo);
+        this.services.CommandManager.AddHandler(MainCommand, mainCommandInfo);
+        this.services.CommandManager.AddHandler(AliasCommand, aliasCommandInfo);
+        this.services.CommandManager.AddHandler(ShortCommand, aliasCommandInfo);
     }
 
     public void Dispose()
@@ -58,12 +63,6 @@ internal sealed class CommandHandler : IDisposable
             || trimmedArguments.Equals("settings", StringComparison.OrdinalIgnoreCase))
         {
             this.configWindow.Toggle();
-            return;
-        }
-
-        if (trimmedArguments.Equals("help", StringComparison.OrdinalIgnoreCase))
-        {
-            this.services.ChatGui.Print(UsageMessage);
             return;
         }
 

@@ -28,8 +28,8 @@ internal sealed class CommandHandler : IDisposable
         var mainCommandInfo = new CommandInfo(this.OnCommand)
         {
             HelpMessage = "Choose a random enabled glamour plate.\n"
-                        +"   /glamroulette, /gr: Alias for /glamourroulette\n" 
-                        +"   /glamourroulette config|settings - Toggle the settings window.",
+                        +"  /glamroulette|/gr - Alias for /glamourroulette\n" 
+                        +"  /glamourroulette config|settings - Toggle the settings window.",
             ShowInHelp = true,
         };
         

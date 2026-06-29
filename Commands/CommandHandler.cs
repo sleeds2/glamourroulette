@@ -29,7 +29,7 @@ internal sealed class CommandHandler : IDisposable
         {
             HelpMessage = "Choose a random enabled glamour plate.\n"
                         + "Aliases: /glamroulette, /gr\n" 
-                        + "Subcommands: config/settings - Toggle the settings window."
+                        + "Subcommands: config/settings - Toggle the settings window.",
             ShowInHelp = true,
         };
         

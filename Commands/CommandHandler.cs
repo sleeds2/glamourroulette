@@ -27,7 +27,9 @@ internal sealed class CommandHandler : IDisposable
 
         var mainCommandInfo = new CommandInfo(this.OnCommand)
         {
-            HelpMessage = "Choose a random enabled glamour plate. Aliases: /glamroulette, /gr. Subcommands: config/settings.",
+            HelpMessage = "Choose a random enabled glamour plate.\n"
+                        + "Aliases: /glamroulette, /gr\n" 
+                        + "Subcommands: config/settings - Toggle the settings window."
             ShowInHelp = true,
         };
         

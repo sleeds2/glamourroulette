@@ -7,7 +7,7 @@ public sealed class PluginConfiguration : IPluginConfiguration
 {
     public const int MaxGlamourPlateCount = 20;
 
-    public int Version { get; set; } = 2;
+    public int Version { get; set; } = 1;
 
     /// <summary>
     /// Explicit per-plate eligibility settings keyed by glamour plate number.

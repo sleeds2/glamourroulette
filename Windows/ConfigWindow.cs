@@ -59,7 +59,7 @@ internal sealed class ConfigWindow : Window
 
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
-                ImGui.TextUnformatted(string.IsNullOrWhiteSpace(plate.Name) ? $"Plate {plate.Number}" : plate.Name);
+                ImGui.TextUnformatted($"Plate {plate.Number}");
 
                 ImGui.TableNextColumn();
                 ImGui.PushID(plate.Number);

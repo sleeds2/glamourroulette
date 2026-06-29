@@ -50,17 +50,6 @@ public sealed class PluginConfiguration : IPluginConfiguration
         this.Save();
     }
 
-    public IEnumerable<int> GetEligiblePlateNumbers()
-    {
-        for (var plateNumber = 1; plateNumber <= MaxGlamourPlateCount; plateNumber++)
-        {
-            if (this.IsPlateEligible(plateNumber))
-            {
-                yield return plateNumber;
-            }
-        }
-    }
-
     public void Save()
     {
         this.RemoveInvalidPlateEligibilityEntries();

@@ -59,7 +59,7 @@ internal sealed class GlamourPlateApplier
         }
     }
 
-    private bool TryGetCurrentGearsetId(out int gearsetId, out string failureMessage, bool requireApplicableState = true)
+    private bool TryGetCurrentGearsetId(out int gearsetId, out string failureMessage)
     {
         gearsetId = -1;
         failureMessage = string.Empty;
@@ -70,7 +70,7 @@ internal sealed class GlamourPlateApplier
             return false;
         }
 
-        if (requireApplicableState && GlamourPlateConditionValidator.IsBlockedByCondition(this.services, out failureMessage))
+        if (GlamourPlateConditionValidator.IsBlockedByCondition(this.services, out failureMessage))
         {
             return false;
         }

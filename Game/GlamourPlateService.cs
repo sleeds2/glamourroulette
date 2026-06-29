@@ -1,5 +1,3 @@
-using Dalamud.Game.ClientState.Conditions;
-using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using GlamourRoulette.Configuration;
 using GlamourRoulette.Services;
@@ -65,14 +63,9 @@ internal sealed class GlamourPlateService
             return ApplyGlamourPlateResult.Failed("A character must be logged in before opening the Glamour Plate UI.");
         }
 
-        if (!this.IsInSanctuary())
+        if (GlamourPlateConditionValidator.IsBlockedByCondition(this.services, out var failureMessage))
         {
-            return ApplyGlamourPlateResult.Failed("Glamour plates can only be applied in sanctuaries, cities, residential areas, and inns.");
-        }
-
-        if (this.services.Condition[ConditionFlag.Mounted])
-        {
-            return ApplyGlamourPlateResult.Failed("Glamour plates cannot be applied while mounted.");
+            return ApplyGlamourPlateResult.Failed(failureMessage);
         }
 
         try
@@ -93,15 +86,6 @@ internal sealed class GlamourPlateService
         {
             this.services.Log.Error(ex, "Failed to open the Glamour Plate UI");
             return ApplyGlamourPlateResult.Failed("Failed to open the Glamour Plate UI: game API call failed.");
-        }
-    }
-
-    private bool IsInSanctuary()
-    {
-        unsafe
-        {
-            var territoryInfo = TerritoryInfo.Instance();
-            return territoryInfo is not null && territoryInfo->InSanctuary;
         }
     }
 }

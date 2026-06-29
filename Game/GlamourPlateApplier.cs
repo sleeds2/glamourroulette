@@ -1,5 +1,3 @@
-using Dalamud.Game.ClientState.Conditions;
-using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using GlamourRoulette.Configuration;
 using GlamourRoulette.Services;
@@ -72,7 +70,7 @@ internal sealed class GlamourPlateApplier
             return false;
         }
 
-        if (requireApplicableState && this.IsBlockedByCondition(out failureMessage))
+        if (requireApplicableState && GlamourPlateConditionValidator.IsBlockedByCondition(this.services, out failureMessage))
         {
             return false;
         }
@@ -117,42 +115,6 @@ internal sealed class GlamourPlateApplier
             }
 
             return gearsetModule->EquipGearset(gearsetId, (byte)plateNumber);
-        }
-    }
-
-    private bool IsBlockedByCondition(out string failureMessage)
-    {
-        if (!this.IsInSanctuary())
-        {
-            failureMessage = "Glamour plates can only be applied in sanctuaries, cities, residential areas, and inns.";
-            return true;
-        }
-
-        if (this.services.Condition[ConditionFlag.Mounted])
-        {
-            failureMessage = "Glamour plates cannot be applied while mounted.";
-            return true;
-        }
-
-        if (this.services.Condition[ConditionFlag.Occupied]
-            || this.services.Condition[ConditionFlag.OccupiedInQuestEvent]
-            || this.services.Condition[ConditionFlag.OccupiedInCutSceneEvent]
-            || this.services.Condition[ConditionFlag.WatchingCutscene])
-        {
-            failureMessage = "Glamour plates cannot be applied while the character is occupied.";
-            return true;
-        }
-
-        failureMessage = string.Empty;
-        return false;
-    }
-
-    private bool IsInSanctuary()
-    {
-        unsafe
-        {
-            var territoryInfo = TerritoryInfo.Instance();
-            return territoryInfo is not null && territoryInfo->InSanctuary;
         }
     }
 

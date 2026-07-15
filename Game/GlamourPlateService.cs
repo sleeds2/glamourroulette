@@ -1,4 +1,4 @@
-using FFXIVClientStructs.FFXIV.Client.UI.Agent;
+using FFXIVClientStructs.FFXIV.Client.Game;
 using GlamourRoulette.Configuration;
 using GlamourRoulette.Services;
 
@@ -63,22 +63,21 @@ internal sealed class GlamourPlateService
             return ApplyGlamourPlateResult.Failed("A character must be logged in before opening the Glamour Plate UI.");
         }
 
-        if (GlamourPlateConditionValidator.IsBlockedByCondition(this.services, out var failureMessage))
-        {
-            return ApplyGlamourPlateResult.Failed(failureMessage);
-        }
-
         try
         {
             unsafe
             {
-                var agent = AgentMiragePrismMiragePlate.Instance();
-                if (agent is null)
+                var actionManager = ActionManager.Instance();
+                if (actionManager is null)
                 {
                     return ApplyGlamourPlateResult.Failed("The Glamour Plate UI is unavailable; please try again after changing areas.");
                 }
 
-                agent->Show();
+                if (!actionManager->UseAction(ActionType.GeneralAction, 0x19))
+                {
+                    return ApplyGlamourPlateResult.Failed("The Glamour Plate UI cannot be opened right now.");
+                }
+
                 return ApplyGlamourPlateResult.Succeeded(null, "Opened the Glamour Plate UI.");
             }
         }

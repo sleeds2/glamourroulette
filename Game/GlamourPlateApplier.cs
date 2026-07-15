@@ -70,11 +70,6 @@ internal sealed class GlamourPlateApplier
             return false;
         }
 
-        if (GlamourPlateConditionValidator.IsBlockedByCondition(this.services, out failureMessage))
-        {
-            return false;
-        }
-
         try
         {
             unsafe

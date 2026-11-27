@@ -86,11 +86,19 @@ internal sealed class ConfigWindow : Window
 
             ImGui.TableHeadersRow();
 
+            var style = ImGui.GetStyle();
+            var disabledRowAlpha = style.Alpha * style.DisabledAlpha;
             foreach (var plate in this.glamourPlateService.GetAllPlates())
             {
                 var enabled = this.configuration.IsPlateEligible(plate.Number);
+                var dimRow = !enabled;
 
                 ImGui.TableNextRow();
+                if (dimRow)
+                {
+                    ImGui.PushStyleVar(ImGuiStyleVar.Alpha, disabledRowAlpha);
+                }
+
                 ImGui.TableNextColumn();
                 ImGui.TextUnformatted($"Plate {plate.Number}");
 
@@ -117,6 +125,10 @@ internal sealed class ConfigWindow : Window
                 }
 
                 ImGui.PopID();
+                if (dimRow)
+                {
+                    ImGui.PopStyleVar();
+                }
             }
 
             ImGui.EndTable();

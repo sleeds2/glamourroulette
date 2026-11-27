@@ -12,6 +12,7 @@ public enum PlateRole
     Melee = 1 << 2,
     Ranged = 1 << 3,
     Magic = 1 << 4,
+    All = Tank | Healer | Melee | Ranged | Magic,
 }
 
 public sealed class PluginConfiguration : IPluginConfiguration
@@ -28,6 +29,7 @@ public sealed class PluginConfiguration : IPluginConfiguration
 
     public bool AdvancedMode { get; set; }
 
+    // Missing entries use all tags. A plate with no tags is saved explicitly.
     public Dictionary<int, PlateRole> PlateRoles { get; set; } = new();
 
     [NonSerialized]
@@ -67,17 +69,46 @@ public sealed class PluginConfiguration : IPluginConfiguration
 
     public PlateRole GetPlateRoles(int plateNumber)
     {
-        return this.PlateRoles.GetValueOrDefault(plateNumber);
+        return this.PlateRoles.GetValueOrDefault(plateNumber, PlateRole.All);
     }
 
     public void SetPlateRoles(int plateNumber, PlateRole roles)
     {
-        if (!IsValidPlateNumber(plateNumber) || this.GetPlateRoles(plateNumber) == roles)
+        if (IsValidPlateNumber(plateNumber) && this.UpdatePlateRoles(plateNumber, roles))
         {
-            return;
+            this.Save();
+        }
+    }
+
+    public void SetRoleForAllPlates(PlateRole role, bool tagged)
+    {
+        var changed = false;
+        for (var plateNumber = 1; plateNumber <= MaxGlamourPlateCount; plateNumber++)
+        {
+            var roles = this.GetPlateRoles(plateNumber);
+            changed |= this.UpdatePlateRoles(plateNumber, tagged ? roles | role : roles & ~role);
         }
 
-        if (roles == PlateRole.None)
+        if (changed)
+        {
+            this.Save();
+        }
+    }
+
+    public void Save()
+    {
+        this.RemoveInvalidPlateEligibilityEntries();
+        this.pluginInterface?.SavePluginConfig(this);
+    }
+
+    private bool UpdatePlateRoles(int plateNumber, PlateRole roles)
+    {
+        if (this.GetPlateRoles(plateNumber) == roles)
+        {
+            return false;
+        }
+
+        if (roles == PlateRole.All)
         {
             this.PlateRoles.Remove(plateNumber);
         }
@@ -86,13 +117,7 @@ public sealed class PluginConfiguration : IPluginConfiguration
             this.PlateRoles[plateNumber] = roles;
         }
 
-        this.Save();
-    }
-
-    public void Save()
-    {
-        this.RemoveInvalidPlateEligibilityEntries();
-        this.pluginInterface?.SavePluginConfig(this);
+        return true;
     }
 
     private static bool IsValidPlateNumber(int plateNumber)

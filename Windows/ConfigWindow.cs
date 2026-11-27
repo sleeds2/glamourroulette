@@ -14,6 +14,9 @@ internal sealed class ConfigWindow : Window
     private readonly PluginServices services;
     private readonly PluginConfiguration configuration;
     private readonly GlamourPlateService glamourPlateService;
+    private bool bulkEditByPlate;
+    private PlateRole bulkEditRole = PlateRole.Tank;
+    private int bulkEditPlate = 1;
 
     public ConfigWindow(PluginServices services, PluginConfiguration configuration, GlamourPlateService glamourPlateService)
         : base("Glamour Roulette Settings##ConfigWindow")
@@ -21,7 +24,7 @@ internal sealed class ConfigWindow : Window
         this.services = services;
         this.configuration = configuration;
         this.glamourPlateService = glamourPlateService;
-        this.Size = new Vector2(440, 560);
+        this.Size = new Vector2(400, 560);
         this.SizeCondition = ImGuiCond.FirstUseEver;
     }
 
@@ -61,7 +64,14 @@ internal sealed class ConfigWindow : Window
             ImGui.SetTooltip("Tag plates by job role. Advanced Mode rolls only enabled plates tagged for your current job's role.\nIf no enabled plate matches, the roll is skipped. With Advanced Mode off, roulette uses all enabled plates.");
         }
 
-        var columnCount = advancedMode ? 3 + Roles.Length : 2;
+        var plates = this.glamourPlateService.GetAllPlates();
+        if (advancedMode)
+        {
+            ImGui.SameLine();
+            this.DrawBulkEdit(plates);
+        }
+
+        var columnCount = advancedMode ? 2 + Roles.Length : 2;
         var tableSizing = advancedMode
             ? ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.ScrollX | ImGuiTableFlags.ScrollY
             : ImGuiTableFlags.SizingStretchProp;
@@ -70,10 +80,9 @@ internal sealed class ConfigWindow : Window
         {
             if (advancedMode)
             {
-                ImGui.TableSetupScrollFreeze(0, 2);
+                ImGui.TableSetupScrollFreeze(0, 1);
                 ImGui.TableSetupColumn("Plate");
                 ImGui.TableSetupColumn("Enabled");
-                ImGui.TableSetupColumn("All Roles");
                 foreach (var role in Roles)
                 {
                     ImGui.TableSetupColumn(role.ToString());
@@ -86,12 +95,6 @@ internal sealed class ConfigWindow : Window
             }
 
             ImGui.TableHeadersRow();
-
-            var plates = this.glamourPlateService.GetAllPlates();
-            if (advancedMode)
-            {
-                this.DrawRoleColumnToggles(plates);
-            }
 
             foreach (var plate in plates)
             {
@@ -111,14 +114,6 @@ internal sealed class ConfigWindow : Window
                 if (advancedMode)
                 {
                     var roles = this.configuration.GetPlateRoles(plate.Number);
-                    ImGui.TableNextColumn();
-                    var allChecked = roles == PlateRole.All;
-                    if (DrawBulkRoleCheckbox("##AllRoles", $"all role tags for plate {plate.Number}", roles != PlateRole.None, ref allChecked))
-                    {
-                        roles = allChecked ? PlateRole.All : PlateRole.None;
-                        this.configuration.SetPlateRoles(plate.Number, roles);
-                    }
-
                     foreach (var role in Roles)
                     {
                         ImGui.TableNextColumn();
@@ -138,48 +133,82 @@ internal sealed class ConfigWindow : Window
         }
     }
 
-    private void DrawRoleColumnToggles(IReadOnlyList<GlamourPlateInfo> plates)
+    private void DrawBulkEdit(IReadOnlyList<GlamourPlateInfo> plates)
     {
-        var rolesCheckedOnAllPlates = PlateRole.All;
-        var rolesCheckedOnAnyPlate = PlateRole.None;
-        foreach (var plate in plates)
+        const string popupId = "##BulkEditRoles";
+        if (ImGui.Button("Bulk Edit…"))
         {
-            var roles = this.configuration.GetPlateRoles(plate.Number);
-            rolesCheckedOnAllPlates &= roles;
-            rolesCheckedOnAnyPlate |= roles;
+            ImGui.OpenPopup(popupId);
         }
 
-        ImGui.TableNextRow();
-        ImGui.TableSetColumnIndex(0);
-        ImGui.AlignTextToFramePadding();
-        ImGui.TextUnformatted("All Plates");
-
-        ImGui.PushID("AllPlates");
-        for (var index = 0; index < Roles.Length; index++)
+        if (!ImGui.BeginPopup(popupId))
         {
-            var role = Roles[index];
-            ImGui.TableSetColumnIndex(3 + index);
-            var allChecked = (rolesCheckedOnAllPlates & role) != 0;
-            var anyChecked = (rolesCheckedOnAnyPlate & role) != 0;
-            if (DrawBulkRoleCheckbox($"##{role}", $"{role} tags for all plates", anyChecked, ref allChecked))
+            return;
+        }
+
+        if (ImGui.RadioButton("By role", !this.bulkEditByPlate))
+        {
+            this.bulkEditByPlate = false;
+        }
+
+        ImGui.SameLine();
+        if (ImGui.RadioButton("By plate", this.bulkEditByPlate))
+        {
+            this.bulkEditByPlate = true;
+        }
+
+        ImGui.SetNextItemWidth(10 * ImGui.GetFontSize());
+        if (this.bulkEditByPlate)
+        {
+            if (ImGui.BeginCombo("Plate (all roles)", $"Plate {this.bulkEditPlate}"))
             {
-                this.configuration.SetRoleForAllPlates(role, allChecked);
+                foreach (var plate in plates)
+                {
+                    var selected = plate.Number == this.bulkEditPlate;
+                    if (ImGui.Selectable($"Plate {plate.Number}", selected))
+                    {
+                        this.bulkEditPlate = plate.Number;
+                    }
+
+                    if (selected)
+                    {
+                        ImGui.SetItemDefaultFocus();
+                    }
+                }
+
+                ImGui.EndCombo();
             }
         }
-
-        ImGui.PopID();
-    }
-
-    private static bool DrawBulkRoleCheckbox(string id, string description, bool anyChecked, ref bool allChecked)
-    {
-        ImGuiP.PushItemFlag(ImGuiItemFlags.MixedValue, anyChecked && !allChecked);
-        var changed = ImGui.Checkbox(id, ref allChecked);
-        ImGuiP.PopItemFlag();
-        if (ImGui.IsItemHovered())
+        else if (ImGui.BeginCombo("Role (all plates)", this.bulkEditRole.ToString()))
         {
-            ImGui.SetTooltip($"{(allChecked ? "Clear" : "Check")} {description}.");
+            foreach (var role in Roles)
+            {
+                if (ImGui.Selectable(role.ToString(), role == this.bulkEditRole))
+                {
+                    this.bulkEditRole = role;
+                }
+            }
+
+            ImGui.EndCombo();
         }
 
-        return changed;
+        var check = ImGui.Button("Check tags");
+        ImGui.SameLine();
+        var clear = ImGui.Button("Clear tags");
+        if (check || clear)
+        {
+            if (this.bulkEditByPlate)
+            {
+                this.configuration.SetPlateRoles(this.bulkEditPlate, check ? PlateRole.All : PlateRole.None);
+            }
+            else
+            {
+                this.configuration.SetRoleForAllPlates(this.bulkEditRole, check);
+            }
+
+            ImGui.CloseCurrentPopup();
+        }
+
+        ImGui.EndPopup();
     }
 }

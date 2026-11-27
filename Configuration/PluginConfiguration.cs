@@ -3,6 +3,17 @@ using Dalamud.Plugin;
 
 namespace GlamourRoulette.Configuration;
 
+[Flags]
+public enum PlateRole
+{
+    None = 0,
+    Tank = 1 << 0,
+    Healer = 1 << 1,
+    Melee = 1 << 2,
+    Ranged = 1 << 3,
+    Magic = 1 << 4,
+}
+
 public sealed class PluginConfiguration : IPluginConfiguration
 {
     public const int MaxGlamourPlateCount = 20;
@@ -14,6 +25,10 @@ public sealed class PluginConfiguration : IPluginConfiguration
     /// Missing plate numbers use the default behavior: enabled.
     /// </summary>
     public Dictionary<int, bool> PlateEligibility { get; set; } = new();
+
+    public bool AdvancedMode { get; set; }
+
+    public Dictionary<int, PlateRole> PlateRoles { get; set; } = new();
 
     [NonSerialized]
     private IDalamudPluginInterface? pluginInterface;
@@ -47,6 +62,30 @@ public sealed class PluginConfiguration : IPluginConfiguration
         }
 
         this.PlateEligibility[plateNumber] = enabled;
+        this.Save();
+    }
+
+    public PlateRole GetPlateRoles(int plateNumber)
+    {
+        return this.PlateRoles.GetValueOrDefault(plateNumber);
+    }
+
+    public void SetPlateRoles(int plateNumber, PlateRole roles)
+    {
+        if (!IsValidPlateNumber(plateNumber) || this.GetPlateRoles(plateNumber) == roles)
+        {
+            return;
+        }
+
+        if (roles == PlateRole.None)
+        {
+            this.PlateRoles.Remove(plateNumber);
+        }
+        else
+        {
+            this.PlateRoles[plateNumber] = roles;
+        }
+
         this.Save();
     }
 

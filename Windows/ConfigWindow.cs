@@ -9,6 +9,8 @@ namespace GlamourRoulette.Windows;
 
 internal sealed class ConfigWindow : Window
 {
+    private static readonly PlateRole[] Roles = [PlateRole.Tank, PlateRole.Healer, PlateRole.Melee, PlateRole.Ranged, PlateRole.Magic];
+
     private readonly PluginServices services;
     private readonly PluginConfiguration configuration;
     private readonly GlamourPlateService glamourPlateService;
@@ -19,7 +21,7 @@ internal sealed class ConfigWindow : Window
         this.services = services;
         this.configuration = configuration;
         this.glamourPlateService = glamourPlateService;
-        this.Size = new Vector2(360, 560);
+        this.Size = new Vector2(400, 560);
         this.SizeCondition = ImGuiCond.FirstUseEver;
     }
 
@@ -47,10 +49,38 @@ internal sealed class ConfigWindow : Window
         ImGui.TextWrapped("Please disable any empty glamour plates.");
         ImGui.PopStyleColor();
 
-        if (ImGui.BeginTable("##GlamourPlateSettingsTable", 2, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | ImGuiTableFlags.SizingStretchProp))
+        var advancedMode = this.configuration.AdvancedMode;
+        if (ImGui.Checkbox("Advanced Mode", ref advancedMode))
         {
-            ImGui.TableSetupColumn("Plate", ImGuiTableColumnFlags.WidthStretch, 2.0f);
-            ImGui.TableSetupColumn("Enabled", ImGuiTableColumnFlags.WidthFixed, 85.0f);
+            this.configuration.AdvancedMode = advancedMode;
+            this.configuration.Save();
+        }
+
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip("Tag plates by job role. If any enabled plate has a tag, roulette only uses enabled plates tagged for your current role.\nWith Advanced Mode off or no enabled plates tagged, roulette uses all enabled plates.");
+        }
+
+        var columnCount = advancedMode ? 2 + Roles.Length : 2;
+        var tableSizing = advancedMode ? ImGuiTableFlags.SizingFixedFit | ImGuiTableFlags.ScrollX : ImGuiTableFlags.SizingStretchProp;
+        var tableId = advancedMode ? "##AdvancedGlamourPlateSettingsTable" : "##GlamourPlateSettingsTable";
+        if (ImGui.BeginTable(tableId, columnCount, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg | tableSizing))
+        {
+            if (advancedMode)
+            {
+                ImGui.TableSetupColumn("Plate");
+                ImGui.TableSetupColumn("Enabled");
+                foreach (var role in Roles)
+                {
+                    ImGui.TableSetupColumn(role.ToString());
+                }
+            }
+            else
+            {
+                ImGui.TableSetupColumn("Plate", ImGuiTableColumnFlags.WidthStretch, 2.0f);
+                ImGui.TableSetupColumn("Enabled", ImGuiTableColumnFlags.WidthFixed, 85.0f);
+            }
+
             ImGui.TableHeadersRow();
 
             foreach (var plate in this.glamourPlateService.GetAllPlates())
@@ -66,6 +96,21 @@ internal sealed class ConfigWindow : Window
                 if (ImGui.Checkbox("##PlateEnabled", ref enabled))
                 {
                     this.configuration.SetPlateEligibility(plate.Number, enabled);
+                }
+
+                if (advancedMode)
+                {
+                    var roles = this.configuration.GetPlateRoles(plate.Number);
+                    foreach (var role in Roles)
+                    {
+                        ImGui.TableNextColumn();
+                        var tagged = (roles & role) != 0;
+                        if (ImGui.Checkbox($"##{role}", ref tagged))
+                        {
+                            roles = tagged ? roles | role : roles & ~role;
+                            this.configuration.SetPlateRoles(plate.Number, roles);
+                        }
+                    }
                 }
 
                 ImGui.PopID();

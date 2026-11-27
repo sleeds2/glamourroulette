@@ -58,7 +58,7 @@ internal sealed class ConfigWindow : Window
 
         if (ImGui.IsItemHovered())
         {
-            ImGui.SetTooltip("Tag plates by job role. If any enabled plate has a tag, roulette only uses enabled plates tagged for your current role.\nWith Advanced Mode off or no enabled plates tagged, roulette uses all enabled plates.");
+            ImGui.SetTooltip("Tag plates by job role. Advanced Mode rolls only enabled plates tagged for your current job's role.\nIf no enabled plate matches, the roll is skipped. With Advanced Mode off, roulette uses all enabled plates.");
         }
 
         var columnCount = advancedMode ? 2 + Roles.Length : 2;

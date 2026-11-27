@@ -43,7 +43,7 @@ internal sealed class GlamourPlateService
             return ApplyGlamourPlateResult.Failed(NoEligiblePlatesMessage);
         }
 
-        if (this.configuration.AdvancedMode && plates.Any(plate => this.configuration.GetPlateRoles(plate.Number) != PlateRole.None))
+        if (this.configuration.AdvancedMode)
         {
             var role = GetPlateRole(player.ClassJob.ValueNullable);
             if (role == PlateRole.None)

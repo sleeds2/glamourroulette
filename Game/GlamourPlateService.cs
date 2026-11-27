@@ -1,6 +1,7 @@
 using FFXIVClientStructs.FFXIV.Client.Game;
 using GlamourRoulette.Configuration;
 using GlamourRoulette.Services;
+using Lumina.Excel.Sheets;
 
 namespace GlamourRoulette.Game;
 
@@ -27,33 +28,52 @@ internal sealed class GlamourPlateService
             .ToList();
     }
 
-    public IReadOnlyList<GlamourPlateInfo> GetEligiblePlates()
-    {
-        return this.GetAllPlates()
-            .Where(plate => this.configuration.IsPlateEligible(plate.Number))
-            .ToList();
-    }
-
-    public GlamourPlateInfo? SelectRandomPlate()
-    {
-        var plates = this.GetEligiblePlates();
-        return plates.Count == 0 ? null : plates[this.random.Next(plates.Count)];
-    }
-
     public ApplyGlamourPlateResult ApplyRandomPlate()
     {
-        if (!this.services.ClientState.IsLoggedIn || this.services.ObjectTable.LocalPlayer is null)
+        if (!this.services.ClientState.IsLoggedIn || this.services.ObjectTable.LocalPlayer is not { } player)
         {
             return ApplyGlamourPlateResult.Failed("A character must be logged in before choosing a glamour plate.");
         }
 
-        var plate = this.SelectRandomPlate();
-        if (plate is null)
+        var plates = this.GetAllPlates()
+            .Where(plate => this.configuration.IsPlateEligible(plate.Number))
+            .ToList();
+        if (plates.Count == 0)
         {
             return ApplyGlamourPlateResult.Failed(NoEligiblePlatesMessage);
         }
 
-        return this.glamourPlateApplier.Apply(plate);
+        if (this.configuration.AdvancedMode)
+        {
+            var role = GetPlateRole(player.ClassJob.ValueNullable);
+            if (role == PlateRole.None)
+            {
+                return ApplyGlamourPlateResult.Failed("Your current class or job has no role for Advanced Mode.");
+            }
+
+            plates.RemoveAll(plate => (this.configuration.GetPlateRoles(plate.Number) & role) == 0);
+            if (plates.Count == 0)
+            {
+                return ApplyGlamourPlateResult.Failed($"No enabled glamour plates are tagged for your current role ({role}).");
+            }
+        }
+
+        return this.glamourPlateApplier.Apply(plates[this.random.Next(plates.Count)]);
+    }
+
+    private static PlateRole GetPlateRole(ClassJob? classJob)
+    {
+        const int intelligence = 4;
+
+        return classJob switch
+        {
+            { Role: 1 } => PlateRole.Tank,
+            { Role: 2 } => PlateRole.Melee,
+            { Role: 3, PrimaryStat: intelligence } => PlateRole.Magic,
+            { Role: 3 } => PlateRole.Ranged,
+            { Role: 4 } => PlateRole.Healer,
+            _ => PlateRole.None,
+        };
     }
 
     public ApplyGlamourPlateResult OpenGlamourPlateUi()

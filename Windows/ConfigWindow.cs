@@ -1,4 +1,7 @@
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface;
+using Dalamud.Interface.Components;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
 using GlamourRoulette.Configuration;
 using GlamourRoulette.Game;
@@ -9,11 +12,15 @@ namespace GlamourRoulette.Windows;
 
 internal sealed class ConfigWindow : Window
 {
+    private const int MaxPlateNameUtf8Bytes = 256;
     private static readonly PlateRole[] Roles = [PlateRole.Tank, PlateRole.Healer, PlateRole.Melee, PlateRole.Ranged, PlateRole.Magic];
 
     private readonly PluginServices services;
     private readonly PluginConfiguration configuration;
     private readonly GlamourPlateService glamourPlateService;
+    private int? editingPlateNumber;
+    private string plateNameDraft = string.Empty;
+    private bool focusPlateNameInput;
 
     public ConfigWindow(PluginServices services, PluginConfiguration configuration, GlamourPlateService glamourPlateService)
         : base("Glamour Roulette Settings##ConfigWindow")
@@ -27,6 +34,20 @@ internal sealed class ConfigWindow : Window
 
     public override void Draw()
     {
+        // Keep Dalamud's window close hotkey disabled until the Escape press is released.
+        if (this.editingPlateNumber.HasValue)
+        {
+            this.RespectCloseHotkey = false;
+            if (ImGui.IsWindowFocused(ImGuiFocusedFlags.RootAndChildWindows) && ImGui.IsKeyPressed(ImGuiKey.Escape, false))
+            {
+                this.editingPlateNumber = null;
+            }
+        }
+        else if (!ImGui.IsKeyDown(ImGuiKey.Escape))
+        {
+            this.RespectCloseHotkey = true;
+        }
+
         if (ImGui.Button("Roll random glamour plate"))
         {
             var result = this.glamourPlateService.ApplyRandomPlate();
@@ -54,6 +75,7 @@ internal sealed class ConfigWindow : Window
         {
             this.configuration.AdvancedMode = advancedMode;
             this.configuration.Save();
+            this.focusPlateNameInput = this.editingPlateNumber.HasValue;
         }
 
         if (ImGui.IsItemHovered())
@@ -71,7 +93,7 @@ internal sealed class ConfigWindow : Window
             if (advancedMode)
             {
                 ImGui.TableSetupScrollFreeze(0, 1);
-                ImGui.TableSetupColumn("Plate");
+                ImGui.TableSetupColumn("Plate", ImGuiTableColumnFlags.WidthFixed, 160.0f * ImGuiHelpers.GlobalScale);
                 ImGui.TableSetupColumn("Enabled");
                 foreach (var role in Roles)
                 {
@@ -99,11 +121,11 @@ internal sealed class ConfigWindow : Window
                     ImGui.PushStyleVar(ImGuiStyleVar.Alpha, disabledRowAlpha);
                 }
 
+                ImGui.PushID(plate.Number);
                 ImGui.TableNextColumn();
-                ImGui.TextUnformatted($"Plate {plate.Number}");
+                this.DrawPlateName(plate.Number);
 
                 ImGui.TableNextColumn();
-                ImGui.PushID(plate.Number);
                 if (ImGui.Checkbox("##PlateEnabled", ref enabled))
                 {
                     this.configuration.SetPlateEligibility(plate.Number, enabled);
@@ -133,5 +155,61 @@ internal sealed class ConfigWindow : Window
 
             ImGui.EndTable();
         }
+    }
+
+    public override void OnClose()
+    {
+        this.editingPlateNumber = null;
+        this.RespectCloseHotkey = true;
+    }
+
+    private void DrawPlateName(int plateNumber)
+    {
+        var plateLabel = $"Plate {plateNumber}";
+        if (this.editingPlateNumber == plateNumber)
+        {
+            ImGui.TextUnformatted(plateLabel);
+            if (this.focusPlateNameInput)
+            {
+                ImGui.SetKeyboardFocusHere();
+                this.focusPlateNameInput = false;
+            }
+
+            ImGui.SetNextItemWidth(-1);
+            var submitted = ImGui.InputTextWithHint("##PlateName", "Optional name", ref this.plateNameDraft,
+                MaxPlateNameUtf8Bytes, ImGuiInputTextFlags.EnterReturnsTrue);
+            if (ImGui.Button("Save") || submitted)
+            {
+                this.configuration.SetPlateName(plateNumber, this.plateNameDraft);
+                this.editingPlateNumber = null;
+            }
+
+            ImGui.SameLine();
+            if (ImGui.Button("Cancel"))
+            {
+                this.editingPlateNumber = null;
+            }
+
+            return;
+        }
+
+        var name = this.configuration.GetPlateName(plateNumber);
+        if (ImGuiComponents.IconButton("RenamePlate", FontAwesomeIcon.PencilAlt))
+        {
+            this.editingPlateNumber = plateNumber;
+            this.plateNameDraft = name;
+            this.focusPlateNameInput = true;
+        }
+
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip($"Rename {plateLabel}");
+        }
+
+        ImGui.SameLine();
+        ImGui.AlignTextToFramePadding();
+        ImGui.PushTextWrapPos(0);
+        ImGui.TextUnformatted(name.Length == 0 ? plateLabel : $"{plateLabel} · {name}");
+        ImGui.PopTextWrapPos();
     }
 }

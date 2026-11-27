@@ -32,6 +32,8 @@ public sealed class PluginConfiguration : IPluginConfiguration
     // Missing entries use all tags. A plate with no tags is saved explicitly.
     public Dictionary<int, PlateRole> PlateRoles { get; set; } = new();
 
+    public Dictionary<int, string> PlateNames { get; set; } = new();
+
     [NonSerialized]
     private IDalamudPluginInterface? pluginInterface;
 
@@ -89,6 +91,36 @@ public sealed class PluginConfiguration : IPluginConfiguration
         }
 
         this.Save();
+    }
+
+    public string GetPlateName(int plateNumber)
+    {
+        return this.PlateNames.GetValueOrDefault(plateNumber) ?? string.Empty;
+    }
+
+    public void SetPlateName(int plateNumber, string name)
+    {
+        if (!IsValidPlateNumber(plateNumber))
+        {
+            return;
+        }
+
+        name = name.Trim();
+        if (name.Length == 0)
+        {
+            if (this.PlateNames.Remove(plateNumber))
+            {
+                this.Save();
+            }
+
+            return;
+        }
+
+        if (this.GetPlateName(plateNumber) != name)
+        {
+            this.PlateNames[plateNumber] = name;
+            this.Save();
+        }
     }
 
     public void Save()

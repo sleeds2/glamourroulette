@@ -74,38 +74,9 @@ public sealed class PluginConfiguration : IPluginConfiguration
 
     public void SetPlateRoles(int plateNumber, PlateRole roles)
     {
-        if (IsValidPlateNumber(plateNumber) && this.UpdatePlateRoles(plateNumber, roles))
+        if (!IsValidPlateNumber(plateNumber) || this.GetPlateRoles(plateNumber) == roles)
         {
-            this.Save();
-        }
-    }
-
-    public void SetRoleForAllPlates(PlateRole role, bool tagged)
-    {
-        var changed = false;
-        for (var plateNumber = 1; plateNumber <= MaxGlamourPlateCount; plateNumber++)
-        {
-            var roles = this.GetPlateRoles(plateNumber);
-            changed |= this.UpdatePlateRoles(plateNumber, tagged ? roles | role : roles & ~role);
-        }
-
-        if (changed)
-        {
-            this.Save();
-        }
-    }
-
-    public void Save()
-    {
-        this.RemoveInvalidPlateEligibilityEntries();
-        this.pluginInterface?.SavePluginConfig(this);
-    }
-
-    private bool UpdatePlateRoles(int plateNumber, PlateRole roles)
-    {
-        if (this.GetPlateRoles(plateNumber) == roles)
-        {
-            return false;
+            return;
         }
 
         if (roles == PlateRole.All)
@@ -117,7 +88,13 @@ public sealed class PluginConfiguration : IPluginConfiguration
             this.PlateRoles[plateNumber] = roles;
         }
 
-        return true;
+        this.Save();
+    }
+
+    public void Save()
+    {
+        this.RemoveInvalidPlateEligibilityEntries();
+        this.pluginInterface?.SavePluginConfig(this);
     }
 
     private static bool IsValidPlateNumber(int plateNumber)
